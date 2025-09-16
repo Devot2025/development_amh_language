@@ -1,2 +1,6 @@
-@!test用のコメントアウトです。ログ出力されます。
+@!test
+@ test
+@:test:@
+var = 2025;
 sys.io.putln("hello world!" + var);
+
