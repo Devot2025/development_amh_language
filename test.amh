@@ -1,0 +1,2 @@
+@!test用のコメントアウトです。ログ出力されます。
+sys.io.putln("hello world!" + var);
