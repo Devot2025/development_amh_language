@@ -9,16 +9,6 @@
 #include "lexser_main_amh.h"
 #define temp_print_e(...) fprintf(stderr, __VA_ARGS__)
 
-char * stack_scan_line() {
-	/*now develope */
-	/*
-	char* dst_buffer = smart_calloc(char, UCHAR_MAX);
-	while (scanf("%256s", dst_buffer)) {
-
-	}
-	*/
-	return NULL;
-}
 size_t get_file_all_size(FILE * src_f) {
 	fseek(src_f, 0, SEEK_END);
 	size_t f_size = ftell(src_f);
@@ -152,8 +142,7 @@ Amh_Lex_Token_Type check_to_token_special_literal(const char* src_token) {
 }
 
 Amh_Lex_Token_Type decision_token_type_standard(const char * src_token) {
-	/*auto base standard */	if (!src_token)return E_Amh_Lex_Token_Type_NULL;
-	/*token str check to keyword iden and if true return keyword*/
+	if (!src_token)return E_Amh_Lex_Token_Type_NULL;
 	Amh_Lex_Token_Type amh_type;
 	if (check_to_token_keyword(src_token))return E_Amh_Lex_Token_Type_Keyword;
 	else {
@@ -320,29 +309,20 @@ Amh_Lex_Token_List * start_lex_amh_code(const char* src_amh_code) {
 			}
 		}
 		else if (now_lex_mode == E_Amh_Lex_Dot) {
-			/*seeking to dot next word(bin or alpha).*/
 
 			if (!check_to_digit_8byte(tmp_code_byte)) {
-				/*decision to none binary*/
-				/*begin regist to parent iden.*/
 				append_lex_token_to_token_list(amh_token, stack_token, E_Amh_Lex_Token_Type_NULL);
-				/*dot append,ecircle*/
 				append_str_buff(stack_token, '.');
-				/*next regist to dot(operation)*/
 				append_lex_token_to_token_list(amh_token, stack_token, E_Amh_Lex_Token_Type_Operation);
-				/*now not regist to children iden.*/
 			}
-			/*if now word is binary. dot append.*/
 			else append_str_buff(stack_token, '.');
 			/*reset mode*/
 			now_lex_mode = E_Amh_Lex_Normal;
-			/*now word is re run to next process.*/
 			continue;
 		}
 		else if (now_lex_mode == E_Amh_Lex_D_Str_Literal) {
 			if (tmp_code_byte == '"') {
 				append_lex_token_to_token_list(amh_token, stack_token, E_Amh_Lex_Token_Type_D_Str_Literal);
-				/*re mode normal */
 				now_lex_mode = E_Amh_Lex_Normal;
 			}
 			else if (tmp_code_byte == '\\') {
@@ -431,3 +411,4 @@ Amh_Lex_Token_List * start_read_amh_lex_main(const char * amh_file_path) {
 	return amh_token_list;
 
 }
+
