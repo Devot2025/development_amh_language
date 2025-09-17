@@ -1,9 +1,10 @@
-@!test
+#run
 @ test
-@:test:@
-
-var = 2025 + v_em;
-@ hello world! : 2025
-sys.io.putln("hello world! : " + var);
-
-
+@! test
+@:
+ line
+ test
+:@
+var = 2024 + 1;
+sys.out.putln("hello world! : " + var);
+return 0;

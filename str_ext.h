@@ -3,17 +3,18 @@
 #define str_ext_si_strap static inline
 
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
 typedef struct Str_Buffer_Array {
 	char* str_buff;
-	uintptr_t str_size;
-	uintptr_t str_index;
+	uint32_t str_size;
+	uint32_t str_index;
 }Str_Buffer_Array;
 
-Str_Buffer_Array* gen_str_buffer_array(uintptr_t ini_size);
-Str_Buffer_Array* move_str_buffer_s(Str_Buffer_Array* src_str_buffer, uintptr_t src_size);
+Str_Buffer_Array* gen_str_buffer_array(uint32_t ini_size);
+Str_Buffer_Array* move_str_buffer_s(Str_Buffer_Array* src_str_buffer, uint32_t src_size);
 void delete_str_buffer_array(Str_Buffer_Array** src_str_buffer);
 void append_str_buff(Str_Buffer_Array* src_str, const char src_byte);
 void str_buffer_empty(Str_Buffer_Array* src_str_buffer);

@@ -28,7 +28,7 @@ Str_Buffer_Array* move_str_buffer_array(Str_Buffer_Array* src_str_buffer) {
 	return new_str_buff;
 }
 
-Str_Buffer_Array* gen_str_buffer_array(uintptr_t ini_size) {
+Str_Buffer_Array* gen_str_buffer_array(uint32_t ini_size) {
 	Str_Buffer_Array* base_str;
 	base_str = smart_calloc(Str_Buffer_Array, 1);
 	if (!base_str)return NULL;
@@ -56,7 +56,7 @@ char * str_dup_ext(const char* src_str) {
 	if(dst_str)memcpy(dst_str, src_str, len_s);
 	return dst_str;
 }
-Str_Buffer_Array* move_str_buffer_s(Str_Buffer_Array* src_str_buffer, uintptr_t src_size) {
+Str_Buffer_Array* move_str_buffer_s(Str_Buffer_Array* src_str_buffer, uint32_t src_size) {
 	if (!src_str_buffer)return NULL;
 	if (src_str_buffer->str_size < src_size + 1)return NULL;
 	Str_Buffer_Array* new_str_buffer = smart_calloc(Str_Buffer_Array, 1);
