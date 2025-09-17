@@ -1,5 +1,5 @@
 /*
-*amh language lexser prottype
+*amh language lexser(prottype)
 */
 
 #include <stdio.h>
@@ -411,4 +411,5 @@ Amh_Lex_Token_List * start_read_amh_lex_main(const char * amh_file_path) {
 	return amh_token_list;
 
 }
+
 
