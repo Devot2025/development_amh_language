@@ -109,10 +109,10 @@ inline const char* get_now_amh_token_str(Amh_Lex_Token_List* src_amh_token_list)
 }
 const char* get_comsume_amh_token_str(Amh_Lex_Token_List* src_amh_token_list);
 
-/*amh lex token append to list.*/
 void delete_amh_token_list(Amh_Lex_Token_List** src_amh_token_list);
 void amh_token_list_call(Amh_Lex_Token_List* src_amh_token_list);
 
 void append_lex_token_to_token_list(Amh_Lex_Token_List* src_amh_token_list, Str_Buffer_Array* src_stack_token, Amh_Lex_Token_Type src_lex_token_type);
 #endif // !_LEXSER_MAIN_AMHERSTIA_H_
+
 
