@@ -52,6 +52,7 @@ typedef struct Amh_Lex_Token {
 	Amh_Lex_Token_Type amh_token_type;
 }Amh_Lex_Token;
 typedef struct Amh_Lex_Token_List {
+	const char* abstract_host;
 	Amh_Lex_Token * stack_token_list;
 	uint32_t stack_token_list_size;
 	uint32_t stack_token_list_index;
@@ -76,6 +77,7 @@ bool amh_token_list_expect_str(Amh_Lex_Token_List* src_amh_token_list, const cha
 void consume_advance_list(Amh_Lex_Token_List* src_amh_token_list);
 Amh_Abstract_Host* gen_abstract_host(const char* first_abstract_host_name, uint32_t src_host_num);
 lex_amh_is_strap const Amh_Lex_Token* get_now_amh_token(Amh_Lex_Token_List* src_amh_token_list) {
+	if (src_amh_token_list->stack_token_list_index >= src_amh_token_list->stack_token_list_size) return NULL;
 	return src_amh_token_list->stack_token_list + src_amh_token_list->stack_token_list_index;
 }
 

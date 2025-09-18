@@ -1,10 +1,9 @@
-#run
-@ test
-@! test
+@! stdout -> test
 @:
- line
- test
+	test,test
+	test,test
 :@
-var = 2024 + 1;
-sys.out.putln("hello world! : " + var);
-return 0;
+@
+xx=1;
+func(){
+}

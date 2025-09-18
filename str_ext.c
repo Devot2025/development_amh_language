@@ -9,7 +9,7 @@ void delete_str_buffer_array(Str_Buffer_Array** src_str_buffer) {
 	*src_str_buffer = NULL;
 }
 void append_str_buff(Str_Buffer_Array* src_str, const char src_byte) {
-	if (!safety_realloc(&src_str->str_buff, src_str->str_index + 2, &src_str->str_size, sizeof(char))) return;
+	if (!safety_realloc((void **) & src_str->str_buff, src_str->str_index + 2, &src_str->str_size, sizeof(char))) return;
 
 	insert_str_buff(src_str, src_byte);
 	(*(src_str->str_buff + src_str->str_index + 1)) = '\0';

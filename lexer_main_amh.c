@@ -172,7 +172,7 @@ Amh_Lex_Token_Type decision_token_type_standard(const char * src_token) {
 }
 void append_lex_token_to_token_list(Amh_Lex_Token_List * src_amh_token_list, Str_Buffer_Array * src_stack_token, Amh_Lex_Token_Type src_lex_token_type) {
 	if (src_stack_token->str_index == 0)return;
-	if (!safety_realloc(&src_amh_token_list->stack_token_list, src_amh_token_list->stack_token_list_index, &src_amh_token_list->stack_token_list_size, sizeof(Amh_Lex_Token))) return;
+	if (!safety_realloc((void **) & src_amh_token_list->stack_token_list, src_amh_token_list->stack_token_list_index, &src_amh_token_list->stack_token_list_size, sizeof(Amh_Lex_Token))) return;
 
 	(*(src_amh_token_list->stack_token_list + src_amh_token_list->stack_token_list_index)).amh_token = _strdup(src_stack_token->str_buff);
 	if (src_lex_token_type == E_Amh_Lex_Token_Type_NULL) src_lex_token_type = decision_token_type_standard(src_stack_token->str_buff);
@@ -207,7 +207,7 @@ void amh_token_list_call(Amh_Lex_Token_List* src_amh_token_list) {
 	const char* amh_token_type_str[] = {
 		"ope", "punch", "bin literal", "spe literal", "s str", "d str", "standard", "keyword", "iden", "hashpro", "null"
 	};
-	if (!src_amh_token_list->stack_token_list)return NULL;
+	if (!src_amh_token_list->stack_token_list)return;
 	for (src_amh_token_list->stack_token_list_index = 0; src_amh_token_list->stack_token_list_index < src_amh_token_list->stack_token_list_size; src_amh_token_list->stack_token_list_index++) {
 		printf("[idx %10lu|type %10s|token %10s]\n", src_amh_token_list->stack_token_list_index,
 			amh_token_type_str[(*(src_amh_token_list->stack_token_list + src_amh_token_list->stack_token_list_index)).amh_token_type],
@@ -472,6 +472,7 @@ Amh_Lex_Token_List * start_read_amh_lex_main(const char * abstract_host, const c
 	char* amh_code = start_read_amh_file_code(amh_file_path);
 	if (!amh_code)return NULL;
 	Amh_Lex_Token_List* amh_token_list = start_lex_amh_code(amh_file_path, amh_code);
+	amh_token_list->abstract_host = amh_file_path;
 	free(amh_code);
 	return amh_token_list;
 }

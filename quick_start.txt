@@ -1,0 +1,8 @@
+OS \ Compiler	MSVC 64-bit	GCC 64-bit	MSVC 32-bit	Clang
+Windows	 Works	 Works (MinGW-w64 13.2.0 verified)	 Probably works (needs testing)	 Probably works (needs testing)
+Linux	– Not applicable	 Works	– Not applicable	 Works (expected)
+macOS	– Not applicable	 Unknown (Homebrew GCC may work)	– Not applicable	 Works (Apple Clang, expected)
+Other OS	 Unknown	 Unknown	 Unknown	 Unknown
+
+quick start
+gcc main.c ext_alloc.c str_ext.c lexer_main_amh.c hash_process_module_host.c parser_main_amh.c amh_hash_process_main.c
