@@ -109,7 +109,7 @@ void delete_amh_token_list(Amh_Lex_Token_List** src_amh_token_list) {
 #define AMH_TOKEN_KEY_WORD_NUM 100
 bool check_to_token_keyword(const char* src_token) {
 	const char* keyword_token_list[] = {
-		"loop", "if", "else", "a_break", "break", "pub", "pri", "pro",
+		"loop", "if", "else", "a_break", "break", "pbl", "prv", "prt","fld", "mod"
 		"int", "float", "double", "char", "string", "virtuals", "none", "array", "return", "albtype", "switch", NULL
 	};
 
@@ -175,6 +175,8 @@ void append_lex_token_to_token_list(Amh_Lex_Token_List * src_amh_token_list, Str
 	if (!safety_realloc((void **) & src_amh_token_list->stack_token_list, src_amh_token_list->stack_token_list_index, &src_amh_token_list->stack_token_list_size, sizeof(Amh_Lex_Token))) return;
 
 	(*(src_amh_token_list->stack_token_list + src_amh_token_list->stack_token_list_index)).amh_token = _strdup(src_stack_token->str_buff);
+	//printf("axx->[%s|%s]\n", src_stack_token->str_buff, (*(src_amh_token_list->stack_token_list + src_amh_token_list->stack_token_list_index)).amh_token);
+
 	if (src_lex_token_type == E_Amh_Lex_Token_Type_NULL) src_lex_token_type = decision_token_type_standard(src_stack_token->str_buff);
 	(*(src_amh_token_list->stack_token_list + src_amh_token_list->stack_token_list_index)).amh_token_type = src_lex_token_type;
 	
@@ -239,7 +241,7 @@ Amh_Abstract_Host* gen_abstract_host(const char* first_abstract_host_name, uint3
 		return NULL;
 	}
 	dst_amh_abstract_host->host_size = src_host_num;
-	dst_amh_abstract_host->host_name[dst_amh_abstract_host->now_host_index] = _strdup(first_abstract_host_name);
+	dst_amh_abstract_host->host_name[dst_amh_abstract_host->now_host_index] = simple_strdup(first_abstract_host_name);
 	if (!dst_amh_abstract_host->host_name[dst_amh_abstract_host->now_host_index]) {
 		free(dst_amh_abstract_host->host_name);
 		free(dst_amh_abstract_host);
@@ -257,11 +259,13 @@ Amh_Lex_Token_List* start_lex_amh_code(const char* amh_file_name, const char* sr
 	while (*src_amh_code) {
 
 		char tmp_code_byte = *src_amh_code;
+
 		/*check and realloc*/
 		if (now_lex_mode == E_Amh_Lex_Normal) {
 			/*normal read mode*/
 
 			if (byte_match_to_list_8(tmp_code_byte, ";(){}")) {
+
 				append_lex_token_to_token_list(amh_token, stack_token, E_Amh_Lex_Token_Type_NULL);
 				append_str_buff(stack_token, tmp_code_byte);
 				append_lex_token_to_token_list(amh_token, stack_token, E_Amh_Lex_Token_Type_Punchcute);
@@ -288,7 +292,11 @@ Amh_Lex_Token_List* start_lex_amh_code(const char* amh_file_name, const char* sr
 				now_lex_mode = E_Amh_Lex_D_Str_Literal;
 			}
 			else if (tmp_code_byte == '`') {
+				append_lex_token_to_token_list(amh_token, stack_token, E_Amh_Lex_Token_Type_NULL);
 
+				append_str_buff(stack_token, tmp_code_byte);
+				append_lex_token_to_token_list(amh_token, stack_token, E_Amh_Lex_Operation);
+				now_lex_mode = E_Amh_Lex_Arr_Literal;
 			}
 			else if (tmp_code_byte == '\'') {
 				append_lex_token_to_token_list(amh_token, stack_token, E_Amh_Lex_Token_Type_NULL);
@@ -303,6 +311,9 @@ Amh_Lex_Token_List* start_lex_amh_code(const char* amh_file_name, const char* sr
 				now_lex_mode = E_Amh_Lex_Comment_Start;
 			}
 			else if (tmp_code_byte == ' ') {
+				append_lex_token_to_token_list(amh_token, stack_token, E_Amh_Lex_Token_Type_NULL);
+			}
+			else if (tmp_code_byte == '	') {
 				append_lex_token_to_token_list(amh_token, stack_token, E_Amh_Lex_Token_Type_NULL);
 			}
 			else if (!byte_match_to_list_8(tmp_code_byte, "\r\b\n")) {
@@ -343,6 +354,19 @@ Amh_Lex_Token_List* start_lex_amh_code(const char* amh_file_name, const char* sr
 				delete_str_buffer_array(&tmp_str_buff);
 			}
 		}
+		else if (now_lex_mode == E_Amh_Lex_Arr_Literal) {
+			if (tmp_code_byte == '`') {
+				append_lex_token_to_token_list(amh_token, stack_token, E_Amh_Lex_Token_Type_Operation);
+				append_str_buff(stack_token, tmp_code_byte);
+				append_lex_token_to_token_list(amh_token, stack_token, E_Amh_Lex_Operation);
+			}
+			else if (tmp_code_byte == ' ') {
+				append_lex_token_to_token_list(amh_token, stack_token, E_Amh_Lex_Token_Type_NULL);
+			}
+			else if (tmp_code_byte == '"') {
+
+			}
+		}
 		else if (now_lex_mode == E_Amh_Lex_Dot) {
 			/*seeking to dot next word(bin or alpha).*/
 
@@ -365,17 +389,28 @@ Amh_Lex_Token_List* start_lex_amh_code(const char* amh_file_name, const char* sr
 		}
 		else if (now_lex_mode == E_Amh_Lex_D_Str_Literal) {
 			if (tmp_code_byte == '"') {
-				append_lex_token_to_token_list(amh_token, stack_token, E_Amh_Lex_Token_Type_D_Str_Literal);
+
 				/*re mode normal */
-				now_lex_mode = E_Amh_Lex_Normal;
+				now_lex_mode = E_Amh_Lex_D_Str_Literal_Next;
 			}
 			else if (tmp_code_byte == '\\') {
 
 				now_lex_mode = E_Amh_Lex_D_Str_Doll;
 
 			}
+			else if (tmp_code_byte == '\n')now_lex_mode = E_Amh_Lex_Normal;
 			else append_str_buff(stack_token, tmp_code_byte);
 
+		}
+		else if (now_lex_mode == E_Amh_Lex_D_Str_Literal_Next) {
+			if (tmp_code_byte == '"') {
+				now_lex_mode = E_Amh_Lex_D_Str_Literal;
+			}
+			if (tmp_code_byte != '\n') {
+				append_lex_token_to_token_list(amh_token, stack_token, E_Amh_Lex_Token_Type_D_Str_Literal);
+				now_lex_mode = E_Amh_Lex_Normal;
+				continue;
+			}
 		}
 		else if (now_lex_mode == E_Amh_Lex_D_Str_Doll) {
 			if (tmp_code_byte == 'n') append_str_buff(stack_token, '\n');

@@ -1,14 +1,11 @@
-@! stdout -> test
+@! test(stdout)
 @:
 	test,test
 	test,test
 :@
-@
-func(){
-
+@ test
+io(){
+   write(){
+      sys.puts("hello world!");
+   }
 }
-x = 1;
-x = x + 2024;
-sys_out_putln("hello world");
-putln("hello world!");
-sys.out.puln("hello world : " + x);

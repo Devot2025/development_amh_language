@@ -19,7 +19,7 @@ bool clamp_realloc(void** block, uint32_t clamp_cap, uint32_t*now_cap, uint32_t 
 	*now_cap = clamp_cap;
 	return true;
 }
-void* dupalloc(void* src_block, uint32_t size) {
+void* dupalloc(const void* src_block, size_t size) {
 	void* new_block = malloc(size);
 	if (!new_block) return new_block;
 	memcpy(new_block, src_block, size);

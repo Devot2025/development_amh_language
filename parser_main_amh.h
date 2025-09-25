@@ -13,6 +13,10 @@ typedef struct Amh_Ast_Nodes {
 	};
 	struct Amh_Ast_Nodes* right;
 }Amh_Ast_Nodes;
+typedef struct Amh_Abstract_Host_Ast_Chain {
+	Amh_Ast_Nodes* amh_block;
+	struct Amh_Abstract_Host_Ast_Chain* amh_block_next;
+}Amh_Abstract_Host_Ast_Chain;
 #define GEN_ENUM(name) name
 #define GEN_ENUM_STRING(name) #name
 #define TOKEN_TYPE_LIST(GEN_MODE)\
@@ -78,15 +82,8 @@ typedef enum Run_Amh_Token_Type {
 }Run_Amh_Token_Type;
 
 extern const char* debug_type_string[];
-amh_ast_parser_is_strap bool ast_op_type_cmp(Amh_Ast_Nodes* src_amh_ast, Run_Amh_Token_Type src_token_type) {
-	return memcmp(src_amh_ast->op, &src_token_type, sizeof(Run_Amh_Token_Type)) == 0;
-}
-amh_ast_parser_is_strap bool ast_op_memcmp_token_type(Amh_Ast_Nodes* src_ast_nodes, Run_Amh_Token_Type src_token_type) {
-	return memcmp(src_ast_nodes->op, &src_token_type, sizeof(Run_Amh_Token_Type)) == 0;
-}
-amh_ast_parser_is_strap const char* acc_iden_token_string(const Amh_Ast_Nodes* src_amh_ast) { return src_amh_ast->op_c + sizeof(Run_Amh_Token_Type); }
-
 void delete_ast_amh_node(Amh_Ast_Nodes* src_amh_ast);
+
 void print_ast_amh_node(Amh_Ast_Nodes* src_amh_ast, uint32_t src_node_indent);
 void* ast_op_memdup(Run_Amh_Token_Type src_token_type, const void* dat, size_t src_size);
 void* ast_op_iden_dup(const Amh_Ast_Nodes* src_ast_node);
@@ -98,7 +95,9 @@ Run_Amh_Token_Type mul_div_amh_token_expect(Amh_Lex_Token_List* src_lex_list);
 
 
 Amh_Ast_Nodes* start_amh_parser_main(Amh_Lex_Token_List * src_lex_list);
+Amh_Abstract_Host_Ast_Chain* build_ast_amh_abstract_host_node(Amh_Lex_Token_List* src_lex_list);
 Amh_Ast_Nodes* build_ast_abstract_amh_host(Amh_Lex_Token_List* src_lex_list);
+Amh_Ast_Nodes* build_ast_amh_block_recursive(Amh_Lex_Token_List* src_lex_list);
 Amh_Ast_Nodes* build_ast_amh_block(Amh_Lex_Token_List* src_lex_list);
 Amh_Ast_Nodes* build_ast_amh_next_iden(Amh_Lex_Token_List* src_lex_list);
 Amh_Ast_Nodes* build_ast_amh_comma(Amh_Lex_Token_List* src_lex_list);
@@ -111,5 +110,49 @@ Amh_Ast_Nodes* build_ast_amh_back_ope(Amh_Lex_Token_List* src_lex_list);
 Amh_Ast_Nodes* build_ast_amh_use_function(Amh_Lex_Token_List* src_lex_list);
 
 Amh_Ast_Nodes* build_ast_amh_basic_token(Amh_Lex_Token_List* src_lex_list);
-#include "amh_hash_process_main.h"
+
+
+amh_ast_parser_is_strap bool ast_op_type_cmp(Amh_Ast_Nodes* src_amh_ast, Run_Amh_Token_Type src_token_type) {
+	return memcmp(src_amh_ast->op, &src_token_type, sizeof(Run_Amh_Token_Type)) == 0;
+}
+amh_ast_parser_is_strap bool ast_op_memcmp_token_type(Amh_Ast_Nodes* src_ast_nodes, Run_Amh_Token_Type src_token_type) {
+	return memcmp(src_ast_nodes->op, &src_token_type, sizeof(Run_Amh_Token_Type)) == 0;
+}
+amh_ast_parser_is_strap const char* acc_iden_token_string(const Amh_Ast_Nodes* src_amh_ast) { return src_amh_ast->op_c + sizeof(Run_Amh_Token_Type); }
+
+amh_ast_parser_is_strap void delete_ast_absrtact_host_chain(Amh_Abstract_Host_Ast_Chain** src_amh_abstract_host_chain) {
+	if (!src_amh_abstract_host_chain || !*src_amh_abstract_host_chain)return;
+	Amh_Abstract_Host_Ast_Chain* tmp_amh_abstract_host_chain = *src_amh_abstract_host_chain;
+	while (tmp_amh_abstract_host_chain) {
+		delete_ast_amh_node(tmp_amh_abstract_host_chain->amh_block);
+		Amh_Abstract_Host_Ast_Chain* tmp_next_chain = tmp_amh_abstract_host_chain->amh_block_next;
+		free(tmp_amh_abstract_host_chain);
+		tmp_amh_abstract_host_chain = tmp_next_chain;
+	}
+	*src_amh_abstract_host_chain = NULL;
+}
+
+amh_ast_parser_is_strap int amh_token_block_process_check(Amh_Lex_Token_List* src_lex_list) {
+	if (amh_token_list_expect_str(src_lex_list, "}"))return -1;
+	if (src_lex_list->stack_token_list_index >= src_lex_list->stack_token_list_size)return 0;
+	return 1;
+}
+amh_ast_parser_is_strap Amh_Ast_Nodes* amh_token_host_chain(Amh_Ast_Nodes* src_chain, Amh_Ast_Nodes* src_node) {
+
+	if (!src_chain) {
+		Amh_Ast_Nodes* amh_next = smart_calloc(Amh_Ast_Nodes, 1);
+		if (!amh_next)return src_chain;
+		amh_next->left = src_chain;
+		amh_next->op = ast_op_memdup(E_Amh_Type_Abstract_Host, NULL, 0);
+		amh_next->right = src_node;
+	}
+	else {
+		Amh_Ast_Nodes* amh_next = smart_calloc(Amh_Ast_Nodes, 1);
+		if (!amh_next)return src_chain;
+		amh_next->op = ast_op_memdup(E_Amh_Type_Abstract_Host, NULL, 0);
+		amh_next->right = src_node;
+		src_chain->left = amh_next;
+		return amh_next;
+	}
+}
 #endif // !_PARSER_MAIN_AMH_H_

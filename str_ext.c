@@ -1,5 +1,4 @@
 
-#include "ext_alloc.h"
 #include "str_ext.h"
 
 void delete_str_buffer_array(Str_Buffer_Array** src_str_buffer) {

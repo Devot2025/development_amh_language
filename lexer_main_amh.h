@@ -13,6 +13,8 @@ typedef enum Amh_Lex_Mode {
 	E_Amh_Lex_Normal,
 	E_Amh_Lex_S_Str_Literal,
 	E_Amh_Lex_D_Str_Literal,
+	E_Amh_Lex_D_Str_Literal_Next,
+	E_Amh_Lex_Arr_Literal,
 	E_Amh_Lex_D_Str_Doll,
 	E_Amh_Lex_Bin_Literal,
 	E_Amh_Lex_Comment_Start,
