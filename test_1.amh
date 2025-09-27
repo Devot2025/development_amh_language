@@ -1,3 +1,11 @@
+@:
+loop{}
+loop(1){} => while
+loop(;;){} => for
+break_a => break all(loop nest)
+break => standard break
+:@
+@! currently in development: ast only Very 
 
 i = loop(i = 0; i < 10; i+=1){
     break_a 1;
@@ -7,4 +15,5 @@ puts(str){
    
    return ___sys__write(str);
 }
+
 return puts(i);
