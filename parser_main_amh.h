@@ -3,7 +3,6 @@
 #include "lexer_main_amh.h"
 #define amh_ast_parser_is_strap static inline
 #define AMH_PARSER_INDEX_CHECK(list)
-#define GET_ARRAY_SIZE(arr) sizeof(arr) / sizeof(arr[0])
 typedef struct Amh_Ast_Nodes {
 	struct Amh_Ast_Nodes* left;
 	union {
@@ -27,6 +26,7 @@ GEN_MODE(E_Amh_Type_For),\
 GEN_MODE(E_Amh_Type_For_Each),\
 GEN_MODE(E_Amh_Type_Do_While),\
 GEN_MODE(E_Amh_Type_Loop),\
+GEN_MODE(E_Amh_Type_Loop_Block),\
 GEN_MODE(E_Amh_Type_If),\
 GEN_MODE(EAmh_Type_Else_If),\
 GEN_MODE(E_Amh_Type_Else),\
@@ -34,6 +34,8 @@ GEN_MODE(E_Amh_Type_Func_Def),\
 GEN_MODE(E_Amh_Type_Func_Use),\
 GEN_MODE(E_Amh_Type_Func_Iden),\
 GEN_MODE(E_Amh_Type_Class_Instance),\
+GEN_MODE(E_Amh_Type_Func_Flat_Args),\
+GEN_MODE(E_Amh_Type_Func_Args),\
 GEN_MODE(E_Amh_Type_Plus),\
 GEN_MODE(E_Amh_Type_Minus),\
 GEN_MODE(E_Amh_Type_Mul),\
@@ -43,6 +45,11 @@ GEN_MODE(E_Amh_Type_Plus_Assignment),\
 GEN_MODE(E_Amh_Type_Minus_Assignment),\
 GEN_MODE(E_Amh_Type_Mul_Assignment),\
 GEN_MODE(E_Amh_Type_Div_Assignment),\
+GEN_MODE(E_Amh_Type_Less),\
+GEN_MODE(E_Amh_Type_Greater),\
+GEN_MODE(E_Amh_Type_Less_Equal),\
+GEN_MODE(E_Amh_Type_Greater_Equal),\
+GEN_MODE(E_Amh_Type_Not_Equal),\
 GEN_MODE(E_Amh_Type_Comma),\
 GEN_MODE(E_Amh_Type_Var_Change),\
 GEN_MODE(E_Amh_Type_Pare),\
@@ -50,6 +57,8 @@ GEN_MODE(E_Amh_Type_Statement),\
 GEN_MODE(E_Amh_Type_Iden),\
 GEN_MODE(E_Amh_Type_Equal),\
 GEN_MODE(E_Amh_Type_Host_Return),\
+GEN_MODE(E_Amh_Type_Seq_Host_Break),\
+GEN_MODE(E_Amh_Type_Seq_Host_Break_All),\
 GEN_MODE(E_Amh_Type_None),\
 GEN_MODE(E_Amh_Type_Virtuals),\
 GEN_MODE(E_Amh_Type_Virtual_Empty),\
@@ -84,7 +93,7 @@ typedef enum Run_Amh_Token_Type {
 extern const char* debug_type_string[];
 void delete_ast_amh_node(Amh_Ast_Nodes* src_amh_ast);
 
-void print_ast_amh_node(Amh_Ast_Nodes* src_amh_ast, uint32_t src_node_indent);
+void print_ast_amh_node(const Amh_Ast_Nodes* src_amh_ast);
 void* ast_op_memdup(Run_Amh_Token_Type src_token_type, const void* dat, size_t src_size);
 void* ast_op_iden_dup(const Amh_Ast_Nodes* src_ast_node);
 
@@ -96,17 +105,21 @@ Run_Amh_Token_Type mul_div_amh_token_expect(Amh_Lex_Token_List* src_lex_list);
 
 Amh_Ast_Nodes* start_amh_parser_main(Amh_Lex_Token_List * src_lex_list);
 Amh_Abstract_Host_Ast_Chain* build_ast_amh_abstract_host_node(Amh_Lex_Token_List* src_lex_list);
+Amh_Ast_Nodes* build_ast_amh_statement(Amh_Ast_Nodes* src_node);
+Amh_Ast_Nodes* build_ast_amh_statement_error(Amh_Lex_Token_List* src_lex_list, Amh_Ast_Nodes* src_node);
 Amh_Ast_Nodes* build_ast_abstract_amh_host(Amh_Lex_Token_List* src_lex_list);
 Amh_Ast_Nodes* build_ast_amh_block_recursive(Amh_Lex_Token_List* src_lex_list);
-Amh_Ast_Nodes* build_ast_amh_block(Amh_Lex_Token_List* src_lex_list);
-Amh_Ast_Nodes* build_ast_amh_next_iden(Amh_Lex_Token_List* src_lex_list);
 Amh_Ast_Nodes* build_ast_amh_comma(Amh_Lex_Token_List* src_lex_list);
 Amh_Ast_Nodes* build_ast_amh_assigment(Amh_Lex_Token_List* src_lex_list);
-Amh_Ast_Nodes* build_ast_amh_add_sub(Amh_Lex_Token_List* src_lex_list);
+Amh_Ast_Nodes* build_ast_amh_equals(Amh_Lex_Token_List* src_lex_list);
+Amh_Ast_Nodes* build_ast_amh_relation(Amh_Lex_Token_List* src_lex_list);
 
+Amh_Ast_Nodes* build_ast_amh_add_sub(Amh_Lex_Token_List* src_lex_list);
+Amh_Ast_Nodes* build_ast_amh_return(Amh_Lex_Token_List* src_lex_list);
 Amh_Ast_Nodes* build_ast_amh_mul_div(Amh_Lex_Token_List* src_lex_list);
 Amh_Ast_Nodes* build_ast_amh_pare(Amh_Lex_Token_List* src_lex_list);
 Amh_Ast_Nodes* build_ast_amh_back_ope(Amh_Lex_Token_List* src_lex_list);
+Amh_Ast_Nodes* build_ast_amh_use_args(Amh_Lex_Token_List* src_lex_list);
 Amh_Ast_Nodes* build_ast_amh_use_function(Amh_Lex_Token_List* src_lex_list);
 
 Amh_Ast_Nodes* build_ast_amh_basic_token(Amh_Lex_Token_List* src_lex_list);
@@ -155,4 +168,10 @@ amh_ast_parser_is_strap Amh_Ast_Nodes* amh_token_host_chain(Amh_Ast_Nodes* src_c
 		return amh_next;
 	}
 }
+
+amh_ast_parser_is_strap Run_Amh_Token_Type get_ast_node_type(const Amh_Ast_Nodes* n) {
+	if (!n || !n->op) return E_Amh_Type_NULL;
+	return *(const Run_Amh_Token_Type*)(n->op);
+}
+
 #endif // !_PARSER_MAIN_AMH_H_

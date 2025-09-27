@@ -18,18 +18,20 @@ typedef struct Str_Buffer_Array {
 
 Str_Buffer_Array* gen_str_buffer_array(uint32_t ini_size);
 Str_Buffer_Array* move_str_buffer_s(Str_Buffer_Array* src_str_buffer, uint32_t src_size);
-str_buffer_array_is_strap char get_str_buff_char(Str_Buffer_Array * src_str_buffer,uint32_t src_index) {
+str_buffer_array_is_strap char get_str_buff_char(const Str_Buffer_Array * src_str_buffer,uint32_t src_index) {
 	return src_index > src_str_buffer->str_index ? '\0' : (*(src_str_buffer->str_buff + src_index));
 }
-str_buffer_array_is_strap char get_str_buff_beg_char(Str_Buffer_Array* src_str_buffer) {
+str_buffer_array_is_strap char get_str_buff_beg_char(const Str_Buffer_Array* src_str_buffer) {
 	return get_str_buff_char(src_str_buffer, 0);
 }
+str_buffer_array_is_strap size_t simple_strlen(const char* src_str) { return src_str ? strlen(src_str) : 0; }
 void delete_str_buffer_array(Str_Buffer_Array** src_str_buffer);
 void append_str_buff(Str_Buffer_Array* src_str, const char src_byte);
 void str_buffer_empty(Str_Buffer_Array* src_str_buffer);
 void str_buffer_back_remove(Str_Buffer_Array* src_str_buffer);
 char* str_dup_ext(const char* src_str);
 str_ext_si_strap char* simple_strdup(const char* src_str) {
+	if (!src_str)return NULL;
 	size_t src_str_len = strlen(src_str);
 	return dupalloc(src_str, src_str_len + 1);
 }
@@ -40,7 +42,9 @@ str_ext_si_strap void insert_str_buff(Str_Buffer_Array* src_str, const char src_
 
 
 
-
+str_ext_si_strap size_t ext_strlen_add_null(const char* src_str) {
+	return strlen(src_str) + 1;
+}
 
 str_ext_si_strap bool check_to_digit_8byte(char src_byte) {
 	return  '0' <= src_byte && src_byte <= '9';

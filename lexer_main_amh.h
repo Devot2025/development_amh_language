@@ -4,6 +4,7 @@
 #include "str_ext.h"
 #include "ext_alloc.h"
 #include <stdint.h>
+#include <assert.h>
 #define lex_amh_is_strap static inline
 /*
 * amherstia lex mode
@@ -39,6 +40,7 @@ typedef enum Amh_Lex_Token_Type {
 	E_Amh_Lex_Token_Type_Keyword,
 	E_Amh_Lex_Token_Type_Iden,
 	E_Amh_Lex_Token_Type_Hash_Process,
+	E_Amh_Lex_Token_Type_Error,
 	E_Amh_Lex_Token_Type_NULL,
 }Amh_Lex_Token_Type;
 
@@ -88,6 +90,7 @@ lex_amh_is_strap const Amh_Lex_Token_Type get_now_amh_token_type(Amh_Lex_Token_L
 }
 
 lex_amh_is_strap const char* get_now_amh_token_str(Amh_Lex_Token_List* src_amh_token_list) {
+	if (src_amh_token_list->stack_token_list_index >= src_amh_token_list->stack_token_list_size) return NULL;
 	return (*(src_amh_token_list->stack_token_list + src_amh_token_list->stack_token_list_index)).amh_token;
 }
 const char* get_comsume_amh_token_str(Amh_Lex_Token_List* src_amh_token_list);

@@ -1,0 +1,10 @@
+
+i = loop(i = 0; i < 10; i+=1){
+    break_a 1;
+};
+puts(str){
+   ___out_str = "" + str;
+   
+   return ___sys__write(str);
+}
+return puts(i);

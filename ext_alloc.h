@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#define GET_ARRAY_SIZE(arr) sizeof(arr) / sizeof(arr[0])
+
 #define s_free(ptr) (free(ptr), ptr = NULL) 
 #define smart_realloc(type, block, size) (type *)realloc(block, sizeof(type) * size)
 

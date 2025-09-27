@@ -109,7 +109,7 @@ void delete_amh_token_list(Amh_Lex_Token_List** src_amh_token_list) {
 #define AMH_TOKEN_KEY_WORD_NUM 100
 bool check_to_token_keyword(const char* src_token) {
 	const char* keyword_token_list[] = {
-		"loop", "if", "else", "a_break", "break", "pbl", "prv", "prt","fld", "mod"
+		"loop", "if", "else", "break_a", "break", "pbl", "prv", "prt","fld", "mod",
 		"int", "float", "double", "char", "string", "virtuals", "none", "array", "return", "albtype", "switch", NULL
 	};
 
@@ -174,7 +174,8 @@ void append_lex_token_to_token_list(Amh_Lex_Token_List * src_amh_token_list, Str
 	if (src_stack_token->str_index == 0)return;
 	if (!safety_realloc((void **) & src_amh_token_list->stack_token_list, src_amh_token_list->stack_token_list_index, &src_amh_token_list->stack_token_list_size, sizeof(Amh_Lex_Token))) return;
 
-	(*(src_amh_token_list->stack_token_list + src_amh_token_list->stack_token_list_index)).amh_token = _strdup(src_stack_token->str_buff);
+	(*(src_amh_token_list->stack_token_list + src_amh_token_list->stack_token_list_index)).amh_token = simple_strdup(src_stack_token->str_buff);
+
 	//printf("axx->[%s|%s]\n", src_stack_token->str_buff, (*(src_amh_token_list->stack_token_list + src_amh_token_list->stack_token_list_index)).amh_token);
 
 	if (src_lex_token_type == E_Amh_Lex_Token_Type_NULL) src_lex_token_type = decision_token_type_standard(src_stack_token->str_buff);
@@ -207,10 +208,11 @@ void consume_advance_list(Amh_Lex_Token_List* src_amh_token_list) {
 
 void amh_token_list_call(Amh_Lex_Token_List* src_amh_token_list) {
 	const char* amh_token_type_str[] = {
-		"ope", "punch", "bin literal", "spe literal", "s str", "d str", "standard", "keyword", "iden", "hashpro", "null"
+		"ope", "punch", "bin literal", "spe literal", "s str", "d str", "standard", "keyword", "iden", "hashpro", "error", "null"
 	};
 	if (!src_amh_token_list->stack_token_list)return;
 	for (src_amh_token_list->stack_token_list_index = 0; src_amh_token_list->stack_token_list_index < src_amh_token_list->stack_token_list_size; src_amh_token_list->stack_token_list_index++) {
+		assert((*(src_amh_token_list->stack_token_list + src_amh_token_list->stack_token_list_index)).amh_token_type <= 10);
 		printf("[idx %10lu|type %10s|token %10s]\n", src_amh_token_list->stack_token_list_index,
 			amh_token_type_str[(*(src_amh_token_list->stack_token_list + src_amh_token_list->stack_token_list_index)).amh_token_type],
 			(*(src_amh_token_list->stack_token_list + src_amh_token_list->stack_token_list_index)).amh_token);
@@ -281,7 +283,7 @@ Amh_Lex_Token_List* start_lex_amh_code(const char* amh_file_name, const char* sr
 
 				append_lex_token_to_token_list(amh_token, stack_token, E_Amh_Lex_Token_Type_NULL);
 				append_str_buff(stack_token, tmp_code_byte);
-				append_lex_token_to_token_list(amh_token, stack_token, E_Amh_Lex_Operation);
+				append_lex_token_to_token_list(amh_token, stack_token, E_Amh_Lex_Token_Type_Operation);
 			}
 			else if (tmp_code_byte == '.') {
 				/*now not stack dot*/
@@ -316,17 +318,22 @@ Amh_Lex_Token_List* start_lex_amh_code(const char* amh_file_name, const char* sr
 			else if (tmp_code_byte == '	') {
 				append_lex_token_to_token_list(amh_token, stack_token, E_Amh_Lex_Token_Type_NULL);
 			}
-			else if (!byte_match_to_list_8(tmp_code_byte, "\r\b\n")) {
+			else if (tmp_code_byte == '\n') {
+				append_lex_token_to_token_list(amh_token, stack_token, E_Amh_Lex_Token_Type_NULL);
+
+			}
+			else if (!byte_match_to_list_8(tmp_code_byte, "\r\b")) {
 				append_str_buff(stack_token, tmp_code_byte);
 			}
 
 		}
 		else if (now_lex_mode == E_Amh_Lex_Operation) {
 			const char* two_byte_ope_list[] = {
-				"<=",">=","==","*=","+=","-=","/=", "::", "++", "--", "**", "//", "+{", "-}"
+				"<=",">=","==","*=","+=","-=","/=", "::", "++", "--", "**", "//", "+{", "-}", "!="
 			};
 			append_str_buff(stack_token, tmp_code_byte);
-			bool two_byte_ope_check = str_match_to_str_list(stack_token->str_buff, two_byte_ope_list, 14);
+
+			bool two_byte_ope_check = str_match_to_str_list(stack_token->str_buff, two_byte_ope_list, GET_ARRAY_SIZE(two_byte_ope_list));
 
 			/*
 			* if not match two byte operator code...
@@ -407,6 +414,9 @@ Amh_Lex_Token_List* start_lex_amh_code(const char* amh_file_name, const char* sr
 				now_lex_mode = E_Amh_Lex_D_Str_Literal;
 			}
 			if (tmp_code_byte != '\n') {
+
+				if (stack_token->str_index == 0)append_str_buff(stack_token, '\0');
+
 				append_lex_token_to_token_list(amh_token, stack_token, E_Amh_Lex_Token_Type_D_Str_Literal);
 				now_lex_mode = E_Amh_Lex_Normal;
 				continue;
@@ -471,7 +481,6 @@ Amh_Lex_Token_List* start_lex_amh_code(const char* amh_file_name, const char* sr
 			if (tmp_code_byte == '\n') {
 				now_lex_mode = E_Amh_Lex_Normal;
 				append_lex_token_to_token_list(amh_token ,stack_token, E_Amh_Lex_Token_Type_Hash_Process);
-				str_buffer_empty(stack_token);
 
 			}
 			else if (!byte_match_to_list_8(tmp_code_byte, "\b\r\t ")) append_str_buff(stack_token, tmp_code_byte);
@@ -481,7 +490,10 @@ Amh_Lex_Token_List* start_lex_amh_code(const char* amh_file_name, const char* sr
 		src_amh_code++;
 
 	}
+	if (stack_token->str_index > 0) {
+		append_lex_token_to_token_list(amh_token, stack_token, E_Amh_Lex_Token_Type_Error);
 
+	}
 
 	delete_str_buffer_array(&stack_token);
 

@@ -1,11 +1,9 @@
-@! test(stdout)
+@! stdout -> test
 @:
 	test,test
 	test,test
 :@
-@ test
-io(){
-   write(){
-      sys.puts("hello world!");
-   }
+@
+xx=1;
+func(){
 }
