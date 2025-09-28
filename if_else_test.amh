@@ -1,0 +1,15 @@
+i = ___sys__read();
+Result_Rank = "";
+if(i < 20){
+   Result_Rank = "A";
+}
+else(i < 40){
+   Result_Rank = "B";
+}
+else(i < 60){
+   Result_Rank = "C";
+}
+else{
+   Result_Rank = "D";
+} 
+return ___sys__write("rank ==> " + Result_Rank);

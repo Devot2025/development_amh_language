@@ -43,7 +43,7 @@ str_ext_si_strap void insert_str_buff(Str_Buffer_Array* src_str, const char src_
 
 
 str_ext_si_strap size_t ext_strlen_add_null(const char* src_str) {
-	return strlen(src_str) + 1;
+	return src_str ? strlen(src_str) + 1 : 0;
 }
 
 str_ext_si_strap bool check_to_digit_8byte(char src_byte) {

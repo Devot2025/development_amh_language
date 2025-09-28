@@ -84,7 +84,12 @@ lex_amh_is_strap const Amh_Lex_Token* get_now_amh_token(Amh_Lex_Token_List* src_
 	if (src_amh_token_list->stack_token_list_index >= src_amh_token_list->stack_token_list_size) return NULL;
 	return src_amh_token_list->stack_token_list + src_amh_token_list->stack_token_list_index;
 }
-
+lex_amh_is_strap bool amh_lex_now_token_elem_check(Amh_Lex_Token_List* src_lex_list, const char* src_token, Amh_Lex_Token_Type src_token_type) {
+	const Amh_Lex_Token* now_token = get_now_amh_token(src_lex_list);
+	if (!now_token)return false;
+	return now_token->amh_token_type == src_token_type &&
+		simple_strcmp(now_token->amh_token, src_token);
+}
 lex_amh_is_strap const Amh_Lex_Token_Type get_now_amh_token_type(Amh_Lex_Token_List* src_amh_token_list) {
 	return (*(src_amh_token_list->stack_token_list + src_amh_token_list->stack_token_list_index)).amh_token_type;
 }

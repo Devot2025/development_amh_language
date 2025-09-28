@@ -16,6 +16,5 @@ int main(void) {
 	printf("abs host -> %s\n", __ABSTRACT__WINDOW__OS__HOST__);
 	print_ast_amh_node(tmp_ast);
 	delete_ast_amh_node(tmp_ast);
-
 	return 0;
 }

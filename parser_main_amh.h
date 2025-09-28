@@ -27,8 +27,9 @@ GEN_MODE(E_Amh_Type_For_Each),\
 GEN_MODE(E_Amh_Type_Do_While),\
 GEN_MODE(E_Amh_Type_Loop),\
 GEN_MODE(E_Amh_Type_Loop_Block),\
+GEN_MODE(E_Amh_Type_If_Else_Chain),\
 GEN_MODE(E_Amh_Type_If),\
-GEN_MODE(EAmh_Type_Else_If),\
+GEN_MODE(E_Amh_Type_Else_If),\
 GEN_MODE(E_Amh_Type_Else),\
 GEN_MODE(E_Amh_Type_Func_Def),\
 GEN_MODE(E_Amh_Type_Func_Use),\
@@ -69,6 +70,7 @@ GEN_MODE(E_Amh_Type_Float),\
 GEN_MODE(E_Amh_Type_Double),\
 GEN_MODE(E_Amh_Type_String),\
 GEN_MODE(E_Amh_Type_Array),\
+GEN_MODE(E_Amh_Type_Array_Use),\
 GEN_MODE(E_Amh_Type_Func),\
 GEN_MODE(E_Amh_Type_Class_Def),\
 GEN_MODE(E_Amh_Type_Class_Member_Def),\
@@ -107,6 +109,7 @@ Amh_Ast_Nodes* start_amh_parser_main(Amh_Lex_Token_List * src_lex_list);
 Amh_Abstract_Host_Ast_Chain* build_ast_amh_abstract_host_node(Amh_Lex_Token_List* src_lex_list);
 Amh_Ast_Nodes* build_ast_amh_statement(Amh_Ast_Nodes* src_node);
 Amh_Ast_Nodes* build_ast_amh_statement_error(Amh_Lex_Token_List* src_lex_list, Amh_Ast_Nodes* src_node);
+Amh_Ast_Nodes* build_ast_amh_statement_entry(Amh_Lex_Token_List* src_lex_list);
 Amh_Ast_Nodes* build_ast_abstract_amh_host(Amh_Lex_Token_List* src_lex_list);
 Amh_Ast_Nodes* build_ast_amh_block_recursive(Amh_Lex_Token_List* src_lex_list);
 Amh_Ast_Nodes* build_ast_amh_comma(Amh_Lex_Token_List* src_lex_list);
@@ -115,10 +118,15 @@ Amh_Ast_Nodes* build_ast_amh_equals(Amh_Lex_Token_List* src_lex_list);
 Amh_Ast_Nodes* build_ast_amh_relation(Amh_Lex_Token_List* src_lex_list);
 
 Amh_Ast_Nodes* build_ast_amh_add_sub(Amh_Lex_Token_List* src_lex_list);
-Amh_Ast_Nodes* build_ast_amh_return(Amh_Lex_Token_List* src_lex_list);
+Amh_Ast_Nodes* build_ast_amh_keyword_if_else(Amh_Ast_Nodes* src_amh_node, Amh_Lex_Token_List* src_lex_list);
+Amh_Ast_Nodes* build_ast_amh_keyword_if(Amh_Lex_Token_List* src_lex_list);
+Amh_Ast_Nodes* build_ast_amh_keyword(Amh_Lex_Token_List* src_lex_list);
 Amh_Ast_Nodes* build_ast_amh_mul_div(Amh_Lex_Token_List* src_lex_list);
+Amh_Ast_Nodes* build_ast_amh_array_literal(Amh_Lex_Token_List* src_lex_list);
 Amh_Ast_Nodes* build_ast_amh_pare(Amh_Lex_Token_List* src_lex_list);
 Amh_Ast_Nodes* build_ast_amh_back_ope(Amh_Lex_Token_List* src_lex_list);
+Amh_Ast_Nodes* build_ast_amh_array_use(Amh_Lex_Token_List* src_lex_list);
+
 Amh_Ast_Nodes* build_ast_amh_use_args(Amh_Lex_Token_List* src_lex_list);
 Amh_Ast_Nodes* build_ast_amh_use_function(Amh_Lex_Token_List* src_lex_list);
 
@@ -129,6 +137,8 @@ amh_ast_parser_is_strap bool ast_op_type_cmp(Amh_Ast_Nodes* src_amh_ast, Run_Amh
 	return memcmp(src_amh_ast->op, &src_token_type, sizeof(Run_Amh_Token_Type)) == 0;
 }
 amh_ast_parser_is_strap bool ast_op_memcmp_token_type(Amh_Ast_Nodes* src_ast_nodes, Run_Amh_Token_Type src_token_type) {
+	if (!src_ast_nodes)printf("–{‘Ì‚ªNULL %s\n", debug_type_string[src_token_type]);
+	if (!src_ast_nodes->op)printf("^‚ñ’†‚ªNULL\n");
 	return memcmp(src_ast_nodes->op, &src_token_type, sizeof(Run_Amh_Token_Type)) == 0;
 }
 amh_ast_parser_is_strap const char* acc_iden_token_string(const Amh_Ast_Nodes* src_amh_ast) { return src_amh_ast->op_c + sizeof(Run_Amh_Token_Type); }

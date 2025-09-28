@@ -85,81 +85,89 @@ void delete_ast_amh_node(Amh_Ast_Nodes * src_amh_ast) {
 #define AMH_AST_ONLY_TREE     "Да   "
 #define AMH_AST_END_TREE    "    "
 
-static void print_ast_tree_line(const Amh_Ast_Nodes* n, const char* prefix, int last_check) {
-	if (!n) return;
+static void print_ast_tree_line(const Amh_Ast_Nodes* src_amh_node, const char* src_prefix, int last_check) {
+	if (!src_amh_node) return;
 
-	fputs(prefix, stdout);
+	fputs(src_prefix, stdout);
 	fputs(last_check ? AMH_AST_SPLIT_ONLY_TREE : AMH_AST_SPLIT_LR_TREE, stdout);
-	Run_Amh_Token_Type t = get_ast_node_type(n);
+	Run_Amh_Token_Type token_type = get_ast_node_type(src_amh_node);
 	
-	if (t == E_Amh_Type_Iden) {
-		printf("(\x1b[31m%s\x1b[0m)", acc_iden_token_string((Amh_Ast_Nodes*)n));
+	if (token_type == E_Amh_Type_Iden) {
+		printf("(\x1b[31m%s\x1b[0m)", acc_iden_token_string((Amh_Ast_Nodes*)src_amh_node));
 	}
-	else if (t == E_Amh_Type_String) {
-		const char* s = (const char*)n->op + sizeof(Run_Amh_Token_Type);
+	else if (token_type == E_Amh_Type_String) {
+		const char* s = (const char*)src_amh_node->op + sizeof(Run_Amh_Token_Type);
 		if (s) printf("(\x1b[31m\"%s\"\x1b[0m)", s);
 	}
-	else if (t == E_Amh_Type_Int) {
-		const int* s = (const int *)((const char*)n->op + sizeof(Run_Amh_Token_Type));
+	else if (token_type == E_Amh_Type_Int) {
+		const int* s = (const int *)((const char*)src_amh_node->op + sizeof(Run_Amh_Token_Type));
 		if (s) printf("(\x1b[35mint:%d\x1b[0m)", *s);
 	}
 
-	else if (t == E_Amh_Type_Float) {
+	else if (token_type == E_Amh_Type_Float) {
 
-		const float* s = (const float*)((const char*)n->op + sizeof(Run_Amh_Token_Type));
+		const float* s = (const float*)((const char*)src_amh_node->op + sizeof(Run_Amh_Token_Type));
 		if (s) printf("(\x1b[35mfloat:%f\x1b[0m)", *s);
 	}
 
-	else if (t == E_Amh_Type_Double) {
+	else if (token_type == E_Amh_Type_Double) {
 
-		const double* s = (const double*)((const char*)n->op + sizeof(Run_Amh_Token_Type));
+		const double* s = (const double*)((const char*)src_amh_node->op + sizeof(Run_Amh_Token_Type));
 		if (s && *s) printf("(\x1b[35mdouble:%lf\x1b[0m)", *s);
 	}
-	else if (t == E_Amh_Type_None) {
-		const char* s = (const char*)n->op + sizeof(Run_Amh_Token_Type);
+	else if (token_type == E_Amh_Type_None) {
+		const char* s = (const char*)src_amh_node->op + sizeof(Run_Amh_Token_Type);
 		if (s && *s) printf("(\x1b[34m\"%s\"\x1b[0m)", s);
 	}
-	else if (t == E_Amh_Type_Abstract_Host) {
-		printf("\x1b[33m%s\x1b[0m", debug_type_string[t]);
+	else if (token_type == E_Amh_Type_Abstract_Host) {
+		printf("\x1b[33m%s\x1b[0m", debug_type_string[token_type]);
 	}
-	else if(t != E_Amh_Type_NULL)fputs(debug_type_string[t], stdout);
+	else if(token_type != E_Amh_Type_NULL)fputs(debug_type_string[token_type], stdout);
 	putchar('\n');
 	char next_prefix[512];
-	snprintf(next_prefix, sizeof(next_prefix), "%s%s", prefix, last_check ? AMH_AST_END_TREE : AMH_AST_ONLY_TREE);
+	snprintf(next_prefix, sizeof(next_prefix), "%s%s", src_prefix, last_check ? AMH_AST_END_TREE : AMH_AST_ONLY_TREE);
 
 
-	if (t == E_Amh_Type_Abstract_Host) {
-		int cnt = 0;
-		for (const Amh_Ast_Nodes* h = n; h; h = h->left) cnt++;
+	if (token_type == E_Amh_Type_Abstract_Host) {
+		int j = 0;
+		for (const Amh_Ast_Nodes* h = src_amh_node; h; h = h->left) j++;
 		int i = 0;
-		for (const Amh_Ast_Nodes* h = n; h; h = h->left, ++i) print_ast_tree_line(h->right, next_prefix, (i == cnt - 1));
+		for (const Amh_Ast_Nodes* h = src_amh_node; h; h = h->left, ++i) print_ast_tree_line(h->right, next_prefix, (i == j - 1));
 		
 		return;
 	}
 
-	if (n->left && n->right) {
-		print_ast_tree_line(n->left, next_prefix, 0);
-		print_ast_tree_line(n->right, next_prefix, 1);
+	if (token_type == E_Amh_Type_If_Else_Chain) {
+		int j = 0;
+		for (const Amh_Ast_Nodes* h = src_amh_node; h; h = h->left) j++;
+		int i = 0;
+		for (const Amh_Ast_Nodes* h = src_amh_node; h; h = h->left, ++i) print_ast_tree_line(h->right, next_prefix, (i == j - 1));
+
+		return;
 	}
-	else if (n->left) print_ast_tree_line(n->left, next_prefix, 1);
-	else print_ast_tree_line(n->right, next_prefix, 1);
+	if (src_amh_node->left && src_amh_node->right) {
+		print_ast_tree_line(src_amh_node->left, next_prefix, 0);
+		print_ast_tree_line(src_amh_node->right, next_prefix, 1);
+	}
+	else if (src_amh_node->left) print_ast_tree_line(src_amh_node->left, next_prefix, 1);
+	else print_ast_tree_line(src_amh_node->right, next_prefix, 1);
 }
 void print_ast_amh_node(const Amh_Ast_Nodes* src_amh_ast) {
 	if (!src_amh_ast) { puts("(empty)"); return; }
 	if (!src_amh_ast->op)return;
 	
 
-	Run_Amh_Token_Type t = get_ast_node_type(src_amh_ast);
+	Run_Amh_Token_Type token_type = get_ast_node_type(src_amh_ast);
 
-	if (t == E_Amh_Type_Abstract_Host) {
-		printf("\x1b[33m%s\x1b[0m\n", debug_type_string[t]);
+	if (token_type == E_Amh_Type_Abstract_Host) {
+		printf("\x1b[33m%s\x1b[0m\n", debug_type_string[token_type]);
 
-		int cnt = 0; for (const Amh_Ast_Nodes* h = src_amh_ast; h; h = h->left) cnt++;
-		int i = 0;   for (const Amh_Ast_Nodes* h = src_amh_ast; h; h = h->left, ++i) print_ast_tree_line(h->right, "", (i == cnt - 1));
+		int j = 0; for (const Amh_Ast_Nodes* h = src_amh_ast; h; h = h->left) j++;
+		int i = 0;   for (const Amh_Ast_Nodes* h = src_amh_ast; h; h = h->left, ++i) print_ast_tree_line(h->right, "", (i == j - 1));
 	}
 	else {
 
-		fputs(debug_type_string[t], stdout);
+		fputs(debug_type_string[token_type], stdout);
 		putchar('\n');
 		if (src_amh_ast->left)  print_ast_tree_line(src_amh_ast->left, "", src_amh_ast->right ? 0 : 1);
 		if (src_amh_ast->right) print_ast_tree_line(src_amh_ast->right, "", 1);
@@ -403,6 +411,7 @@ Amh_Ast_Nodes* build_ast_amh_block_body_process(int *dst_end_check, Amh_Lex_Toke
 Amh_Ast_Nodes* build_ast_amh_block_recursive_backup(Amh_Lex_Token_List* src_lex_list) {
 
 	Amh_Ast_Nodes* amh_left = build_ast_amh_comma(src_lex_list);
+	
 	if (amh_token_list_expect_str(src_lex_list, "{")) {
 
 		int block_end_check = 0;
@@ -561,8 +570,7 @@ Amh_Ast_Nodes* build_ast_amh_block_recursive_backup(Amh_Lex_Token_List* src_lex_
 }
 
 Amh_Ast_Nodes* build_ast_amh_block_recursive(Amh_Lex_Token_List* src_lex_list) {
-
-	Amh_Ast_Nodes* amh_left = build_ast_amh_comma(src_lex_list);
+	Amh_Ast_Nodes* amh_left = build_ast_amh_statement_entry(src_lex_list);
 	if (ast_op_memcmp_token_type(amh_left, E_Amh_Type_Func_Use)) {
 		int block_end_check = 0;
 
@@ -594,7 +602,7 @@ Amh_Ast_Nodes* build_ast_amh_block_recursive(Amh_Lex_Token_List* src_lex_list) {
 		else amh_left = build_ast_amh_statement_error(src_lex_list, amh_left);
 
 	}
-	else if (ast_op_memcmp_token_type(amh_left, E_Amh_Type_Host_Return) || ast_op_memcmp_token_type(amh_left, E_Amh_Type_Seq_Host_Break) |
+	else if (ast_op_memcmp_token_type(amh_left, E_Amh_Type_Host_Return) || ast_op_memcmp_token_type(amh_left, E_Amh_Type_Seq_Host_Break) ||
 		ast_op_memcmp_token_type(amh_left, E_Amh_Type_Seq_Host_Break_All)) {
 		if (amh_token_list_expect_str(src_lex_list, ";")) amh_left = build_ast_amh_statement(amh_left);
 		else amh_left = build_ast_amh_statement_error(src_lex_list, amh_left);
@@ -624,13 +632,14 @@ Amh_Ast_Nodes* build_ast_amh_block_recursive(Amh_Lex_Token_List* src_lex_list) {
 	else if (ast_op_memcmp_token_type(amh_left, E_Amh_Type_While) ||
 		ast_op_memcmp_token_type(amh_left, E_Amh_Type_Loop) ||
 		ast_op_memcmp_token_type(amh_left, E_Amh_Type_For)) {
-		if(amh_left->right)amh_token_list_expect_str(src_lex_list, ";");
+		if (amh_token_list_expect_str(src_lex_list, ";"))amh_left = build_ast_amh_statement(amh_left);
 	}
-	else {
+	else if(!ast_op_memcmp_token_type(amh_left, E_Amh_Type_If_Else_Chain)){
 		if (amh_token_list_expect_str(src_lex_list, ";")) amh_left = build_ast_amh_statement(amh_left);
 
 		else amh_left = build_ast_amh_statement_error(src_lex_list, amh_left);
 	}
+
 	return amh_left;
 }
 
@@ -667,6 +676,12 @@ Amh_Ast_Nodes* build_ast_amh_statement(Amh_Ast_Nodes* src_node) {
 		src_node = amh_right;
 	}
 	return src_node;
+}
+Amh_Ast_Nodes* build_ast_amh_statement_entry(Amh_Lex_Token_List* src_lex_list) {
+	Amh_Ast_Nodes * amh_left = build_ast_amh_keyword_if(src_lex_list);
+
+	if (!amh_left)amh_left = build_ast_amh_comma(src_lex_list);
+	return amh_left;
 }
 Amh_Ast_Nodes* build_ast_amh_comma(Amh_Lex_Token_List* src_lex_list) {
 	Amh_Ast_Nodes* amh_left = build_ast_amh_assigment(src_lex_list);
@@ -754,14 +769,37 @@ Amh_Ast_Nodes* build_ast_amh_mul_div(Amh_Lex_Token_List* src_lex_list) {
 }
 
 Amh_Ast_Nodes* build_ast_amh_back_ope(Amh_Lex_Token_List* src_lex_list) {
-	Amh_Ast_Nodes* amh_left = build_ast_amh_use_function(src_lex_list);
+	Amh_Ast_Nodes* amh_left = build_ast_amh_array_use(src_lex_list);
 	Run_Amh_Token_Type tmp_amh_type;
 	while (tmp_amh_type = back_ope_amh_token_expect(src_lex_list)) {
 		Amh_Ast_Nodes* amh_right = smart_calloc(Amh_Ast_Nodes, 1);
 		if (!amh_right)break;
 		amh_right->left = amh_left;
 		amh_right->op = ast_op_memdup(tmp_amh_type, NULL, 0);
-		amh_right->right = build_ast_amh_use_function(src_lex_list);
+		amh_right->right = build_ast_amh_array_use(src_lex_list);
+		amh_left = amh_right;
+	}
+	return amh_left;
+}
+Amh_Ast_Nodes* build_ast_amh_array_use(Amh_Lex_Token_List* src_lex_list) {
+	Amh_Ast_Nodes* amh_left = build_ast_amh_use_function(src_lex_list);
+	while (((ast_op_memcmp_token_type(amh_left, E_Amh_Type_Iden)) ||
+		(ast_op_memcmp_token_type(amh_left, E_Amh_Type_Func_Use)) ||
+		(ast_op_memcmp_token_type(amh_left, E_Amh_Type_Array_Use)) ||
+		(ast_op_memcmp_token_type(amh_left, E_Amh_Type_Pare))) &&
+		amh_token_list_expect_str(src_lex_list, "[")) {
+		Amh_Ast_Nodes* amh_right = smart_calloc(Amh_Ast_Nodes, 1);
+		if (!amh_right)break;
+		amh_right->left = amh_left;
+		amh_right->right = build_ast_amh_comma(src_lex_list);
+
+		const char* array_use_err_str = "error : expect to ']'";
+
+		if (amh_token_list_expect_str(src_lex_list, "]")) amh_right->op = ast_op_memdup(E_Amh_Type_Array_Use, NULL, 0);
+		/*none is err*/
+		else {
+			amh_right->op = ast_op_memdup(E_Amh_Type_None, array_use_err_str, ext_strlen_add_null(array_use_err_str));
+		}
 		amh_left = amh_right;
 	}
 	return amh_left;
@@ -812,7 +850,7 @@ Amh_Ast_Nodes* build_ast_amh_use_args(Amh_Lex_Token_List* src_lex_list) {
 }
 
 Amh_Ast_Nodes* build_ast_amh_use_function(Amh_Lex_Token_List* src_lex_list) {
-	Amh_Ast_Nodes* amh_left = build_ast_amh_return(src_lex_list);
+	Amh_Ast_Nodes* amh_left = build_ast_amh_keyword(src_lex_list);
 	while((ast_op_memcmp_token_type(amh_left, E_Amh_Type_Iden)) && amh_token_list_expect_str(src_lex_list, "(")) {
 		Amh_Ast_Nodes* amh_right = smart_calloc(Amh_Ast_Nodes, 1);
 		if (!amh_right) break;
@@ -830,113 +868,267 @@ Amh_Ast_Nodes* build_ast_amh_use_function(Amh_Lex_Token_List* src_lex_list) {
 	}
 	return amh_left;
 }
-
-Amh_Ast_Nodes* build_ast_amh_return(Amh_Lex_Token_List* src_lex_list) {
-
+Amh_Ast_Nodes* build_ast_amh_keyword_if(Amh_Lex_Token_List* src_lex_list) {
 	const Amh_Lex_Token* now_token = get_now_amh_token(src_lex_list);
-	if (!now_token) return NULL;
-	if (now_token->amh_token_type == E_Amh_Lex_Token_Type_Keyword) {
-		if (simple_strcmp(now_token->amh_token, "return")) {
-			Amh_Ast_Nodes* amh_right = smart_calloc(Amh_Ast_Nodes, 1);
+	if (!now_token)return NULL;
+	if (simple_strcmp(now_token->amh_token, "if")) {
+		Amh_Ast_Nodes* amh_left = smart_calloc(Amh_Ast_Nodes, 1);
 
+		if (amh_left) {
+			amh_left->op = ast_op_memdup(E_Amh_Type_If_Else_Chain, NULL, 0);
+
+			Amh_Ast_Nodes* amh_right = smart_calloc(Amh_Ast_Nodes, 1);
 			if (amh_right) {
 				consume_advance_list(src_lex_list);
+				const char* if_err_str = NULL;
+				if (!amh_token_list_expect_str(src_lex_list, "(")) if_err_str = "error : expect to '('";
+				amh_right->left = build_ast_amh_comma(src_lex_list);
+				if (!amh_token_list_expect_str(src_lex_list, ")")) {
+					if (!if_err_str)if_err_str = "error : expect to ')'";
+					amh_right->op = ast_op_memdup(E_Amh_Type_None, if_err_str, ext_strlen_add_null(if_err_str));
+				}
+				else {
+					amh_right->op = ast_op_memdup(E_Amh_Type_If, NULL, 0);
+					if (amh_token_list_expect_str(src_lex_list, "{")) {
 
-				amh_right->right = build_ast_amh_comma(src_lex_list);
-				amh_right->op = ast_op_memdup(E_Amh_Type_Host_Return, NULL, 0);
-
-				return amh_right;
-			}
-		}
-		else if (simple_strcmp(now_token->amh_token, "break")) {
-			Amh_Ast_Nodes* amh_right = smart_calloc(Amh_Ast_Nodes, 1);
-
-			if (amh_right) {
-				consume_advance_list(src_lex_list);
-
-				amh_right->right = build_ast_amh_comma(src_lex_list);
-				amh_right->op = ast_op_memdup(E_Amh_Type_Seq_Host_Break, NULL, 0);
-
-				return amh_right;
-			}
-		}
-		else if (simple_strcmp(now_token->amh_token, "break_a")) {
-			Amh_Ast_Nodes* amh_right = smart_calloc(Amh_Ast_Nodes, 1);
-
-			if (amh_right) {
-				consume_advance_list(src_lex_list);
-
-				amh_right->right = build_ast_amh_comma(src_lex_list);
-				amh_right->op = ast_op_memdup(E_Amh_Type_Seq_Host_Break_All, NULL, 0);
-
-				return amh_right;
-			}
-		}
-		else if (simple_strcmp(now_token->amh_token, "loop")) {
-			consume_advance_list(src_lex_list);
-
-			Amh_Ast_Nodes* amh_left = smart_calloc(Amh_Ast_Nodes, 1);
-			if (!amh_left)return NULL;
-			uint32_t loop_check = 0;
-			if (amh_token_list_expect_str(src_lex_list, "(")) {
-				Amh_Ast_Nodes* amh_right = smart_calloc(Amh_Ast_Nodes, 1);
-				Amh_Ast_Nodes* tmp_amh_right;
-				++loop_check;
-				if (amh_right) {
-
-					amh_right->right = build_ast_amh_comma(src_lex_list);
-					amh_right->op = ast_op_memdup(E_Amh_Type_Abstract_Host, NULL, 0);
-					tmp_amh_right = amh_right;
-					while (amh_token_list_expect_str(src_lex_list, ";")) {
-						if (loop_check >= 3)break;
-						Amh_Ast_Nodes* amh_for_right = smart_calloc(Amh_Ast_Nodes, 1);
-						if (!amh_for_right) break;
-						amh_for_right->right = build_ast_amh_comma(src_lex_list);
-						amh_for_right->op = ast_op_memdup(E_Amh_Type_Abstract_Host, NULL, 0);
-						amh_right->left = amh_for_right;
-						amh_right = amh_for_right;
-						++loop_check;
+						int block_end_check = 0;
+						amh_right->right = build_ast_amh_block_body_process(&block_end_check, src_lex_list);
+						if (block_end_check != -1) {
+							if_err_str = "error : expected '}' after if def.";
+							free(amh_right->op);
+							amh_right->op = ast_op_memdup(E_Amh_Type_None, if_err_str, strlen(if_err_str) + 1);
+						}
 
 					}
+					else {
+						amh_right->right = build_ast_amh_block_recursive(src_lex_list);
+					}
 
-					amh_right = tmp_amh_right;
 				}
 
-				amh_left->left = amh_right;
+				amh_left->right = amh_right;
+				build_ast_amh_keyword_if_else(amh_left, src_lex_list);
+				return amh_left;
 			}
-			const char* exptr_end_loop_err_str = "err : expect to ')'";
-			const char* for_loop_err_str = "err : expect to ';'";
+		}
+	}
+	else if (simple_strcmp(now_token->amh_token, "else")) {
+		consume_advance_list(src_lex_list);
 
-			if(loop_check == 0)amh_left->op = ast_op_memdup(E_Amh_Type_Loop, NULL, 0);
-			else if (loop_check == 1) {
-
-				if (amh_token_list_expect_str(src_lex_list, ")")) amh_left->op = ast_op_memdup(E_Amh_Type_While, NULL, 0);
-				else amh_left->op = ast_op_memdup(E_Amh_Type_None, exptr_end_loop_err_str, ext_strlen_add_null(exptr_end_loop_err_str));
-
-			}
-			else if (loop_check == 3) {
-				if (amh_token_list_expect_str(src_lex_list, ")")) amh_left->op = ast_op_memdup(E_Amh_Type_For, NULL, 0);
-				else amh_left->op = ast_op_memdup(E_Amh_Type_None, exptr_end_loop_err_str, ext_strlen_add_null(exptr_end_loop_err_str));
-			}
-			else amh_left->op = ast_op_memdup(E_Amh_Type_None, for_loop_err_str, ext_strlen_add_null(for_loop_err_str));
-			if (amh_token_list_expect_str(src_lex_list, "{")) {
-
-				int block_end_check = 0;
-				amh_left->right = build_ast_amh_block_body_process(&block_end_check, src_lex_list);
-				if (block_end_check != -1) {
-					const char* loop_err = "error: expected '}' after loop def.";
-					free(amh_left->op);
-					amh_left->op = ast_op_memdup(E_Amh_Type_None, loop_err, strlen(loop_err) + 1);
-				}
-
-			}
-
+		Amh_Ast_Nodes* amh_left = smart_calloc(Amh_Ast_Nodes, 1);
+		if (amh_left) {
+			const char* else_err_str = "error : 'else' without matching 'if'.";
+			amh_left->op = ast_op_memdup(E_Amh_Type_None, else_err_str, ext_strlen_add_null(else_err_str));
 			return amh_left;
 		}
 	}
+	return NULL;
+}
+Amh_Ast_Nodes* build_ast_amh_keyword_if_else(Amh_Ast_Nodes* src_amh_node, Amh_Lex_Token_List* src_lex_list) {
 
+	while (amh_lex_now_token_elem_check(src_lex_list, "else", E_Amh_Lex_Token_Type_Keyword)) {
+		consume_advance_list(src_lex_list);
+
+		Amh_Ast_Nodes* amh_right = smart_calloc(Amh_Ast_Nodes, 1);
+		if (!amh_right)break;
+		Amh_Ast_Nodes* amh_chain_node = smart_calloc(Amh_Ast_Nodes, 1);
+		if (!amh_chain_node) {
+			free(amh_chain_node);
+			break;
+		}
+		const char* else_err_str = NULL;
+		if (!amh_token_list_expect_str(src_lex_list, "(")) {
+			amh_right->op = ast_op_memdup(E_Amh_Type_Else, NULL, 0);
+
+			if (amh_token_list_expect_str(src_lex_list, "{")) {
+
+				int block_end_check = 0;
+				amh_right->right = build_ast_amh_block_body_process(&block_end_check, src_lex_list);
+				if (block_end_check != -1) {
+					else_err_str = "error: expected '}' after else.";
+					free(amh_right->op);
+					amh_right->op = ast_op_memdup(E_Amh_Type_None, else_err_str, ext_strlen_add_null(else_err_str));
+				}
+
+			}
+			else amh_right->right = build_ast_amh_block_recursive(src_lex_list);
+
+			amh_chain_node->op = ast_op_memdup(E_Amh_Type_If_Else_Chain, NULL, 0);
+			amh_chain_node->right = amh_right;
+			src_amh_node->left = amh_chain_node;
+			src_amh_node = amh_chain_node;
+			break;
+		}
+		else {
+			amh_right->op = ast_op_memdup(E_Amh_Type_Else_If, NULL, 0);
+
+			amh_right->left = build_ast_amh_comma(src_lex_list);
+
+			if (!amh_token_list_expect_str(src_lex_list, ")")) {
+				if (!else_err_str)else_err_str = "error : expect to ')'";
+				amh_right->op = ast_op_memdup(E_Amh_Type_None, else_err_str, ext_strlen_add_null(else_err_str));
+			}
+			else {
+
+				if (amh_token_list_expect_str(src_lex_list, "{")) {
+
+					int block_end_check = 0;
+					amh_right->right = build_ast_amh_block_body_process(&block_end_check, src_lex_list);
+					if (block_end_check != -1) {
+						else_err_str = "error: expected '}' after else if.";
+						free(amh_right->op);
+						amh_right->op = ast_op_memdup(E_Amh_Type_None, else_err_str, ext_strlen_add_null(else_err_str));
+					}
+
+				}
+				else amh_right->right = build_ast_amh_block_recursive(src_lex_list);
+
+			}
+
+			amh_chain_node->op = ast_op_memdup(E_Amh_Type_If_Else_Chain, NULL, 0);
+			amh_chain_node->right = amh_right;
+			src_amh_node->left = amh_chain_node;
+			src_amh_node = amh_chain_node;
+		}
+
+		
+
+	}
+	return src_amh_node;
+}
+Amh_Ast_Nodes* build_ast_amh_keyword(Amh_Lex_Token_List* src_lex_list) {
+
+	const Amh_Lex_Token* now_token = get_now_amh_token(src_lex_list);
+	if (now_token) {
+		if (now_token->amh_token_type == E_Amh_Lex_Token_Type_Keyword) {
+			if (simple_strcmp(now_token->amh_token, "return")) {
+				Amh_Ast_Nodes* amh_right = smart_calloc(Amh_Ast_Nodes, 1);
+
+				if (amh_right) {
+					consume_advance_list(src_lex_list);
+
+					amh_right->right = build_ast_amh_comma(src_lex_list);
+					amh_right->op = ast_op_memdup(E_Amh_Type_Host_Return, NULL, 0);
+
+					return amh_right;
+				}
+			}
+			else if (simple_strcmp(now_token->amh_token, "break")) {
+				Amh_Ast_Nodes* amh_right = smart_calloc(Amh_Ast_Nodes, 1);
+
+				if (amh_right) {
+					consume_advance_list(src_lex_list);
+
+					amh_right->right = build_ast_amh_comma(src_lex_list);
+					amh_right->op = ast_op_memdup(E_Amh_Type_Seq_Host_Break, NULL, 0);
+
+					return amh_right;
+				}
+			}
+			else if (simple_strcmp(now_token->amh_token, "break_a")) {
+				Amh_Ast_Nodes* amh_right = smart_calloc(Amh_Ast_Nodes, 1);
+
+				if (amh_right) {
+					consume_advance_list(src_lex_list);
+
+					amh_right->right = build_ast_amh_comma(src_lex_list);
+					amh_right->op = ast_op_memdup(E_Amh_Type_Seq_Host_Break_All, NULL, 0);
+
+					return amh_right;
+				}
+			}
+			else if (simple_strcmp(now_token->amh_token, "loop")) {
+				consume_advance_list(src_lex_list);
+
+				Amh_Ast_Nodes* amh_left = smart_calloc(Amh_Ast_Nodes, 1);
+				if (!amh_left)return NULL;
+				uint32_t loop_check = 0;
+				if (amh_token_list_expect_str(src_lex_list, "(")) {
+					Amh_Ast_Nodes* amh_right = smart_calloc(Amh_Ast_Nodes, 1);
+					Amh_Ast_Nodes* tmp_amh_right;
+					++loop_check;
+					if (amh_right) {
+
+						amh_right->right = build_ast_amh_comma(src_lex_list);
+						amh_right->op = ast_op_memdup(E_Amh_Type_Abstract_Host, NULL, 0);
+						tmp_amh_right = amh_right;
+						while (amh_token_list_expect_str(src_lex_list, ";")) {
+							if (loop_check >= 3)break;
+							Amh_Ast_Nodes* amh_for_right = smart_calloc(Amh_Ast_Nodes, 1);
+							if (!amh_for_right) break;
+							amh_for_right->right = build_ast_amh_comma(src_lex_list);
+							amh_for_right->op = ast_op_memdup(E_Amh_Type_Abstract_Host, NULL, 0);
+							amh_right->left = amh_for_right;
+							amh_right = amh_for_right;
+							++loop_check;
+
+						}
+
+						amh_right = tmp_amh_right;
+					}
+
+					amh_left->left = amh_right;
+				}
+				const char* exptr_end_loop_err_str = "err : expect to ')'";
+				const char* for_loop_err_str = "err : expect to ';'";
+
+				if (loop_check == 0)amh_left->op = ast_op_memdup(E_Amh_Type_Loop, NULL, 0);
+				else if (loop_check == 1) {
+
+					if (amh_token_list_expect_str(src_lex_list, ")")) amh_left->op = ast_op_memdup(E_Amh_Type_While, NULL, 0);
+					else amh_left->op = ast_op_memdup(E_Amh_Type_None, exptr_end_loop_err_str, ext_strlen_add_null(exptr_end_loop_err_str));
+
+				}
+				else if (loop_check == 3) {
+					if (amh_token_list_expect_str(src_lex_list, ")")) amh_left->op = ast_op_memdup(E_Amh_Type_For, NULL, 0);
+					else amh_left->op = ast_op_memdup(E_Amh_Type_None, exptr_end_loop_err_str, ext_strlen_add_null(exptr_end_loop_err_str));
+				}
+				else amh_left->op = ast_op_memdup(E_Amh_Type_None, for_loop_err_str, ext_strlen_add_null(for_loop_err_str));
+				if (amh_token_list_expect_str(src_lex_list, "{")) {
+
+					int block_end_check = 0;
+					amh_left->right = build_ast_amh_block_body_process(&block_end_check, src_lex_list);
+					if (block_end_check != -1) {
+						const char* loop_err = "error: expected '}' after loop def.";
+						free(amh_left->op);
+						amh_left->op = ast_op_memdup(E_Amh_Type_None, loop_err, strlen(loop_err) + 1);
+					}
+
+				}
+
+				return amh_left;
+			}
+		}
+	}
 	return build_ast_amh_pare(src_lex_list);
 }
+Amh_Ast_Nodes* build_ast_amh_array_literal(Amh_Lex_Token_List* src_lex_list) {
+	Amh_Ast_Nodes* amh_left = smart_calloc(Amh_Ast_Nodes, 1);
+	if (!amh_left) return NULL;
+
+	if (amh_token_list_expect_str(src_lex_list, "]")) {
+		amh_left->op = ast_op_memdup(E_Amh_Type_Array, NULL, 0);
+		return amh_left;
+	}
+
+	amh_left->left = build_ast_amh_comma(src_lex_list);
+
+	if (ast_op_memcmp_token_type(amh_left->left, E_Amh_Type_Comma) &&
+		ast_op_memcmp_token_type(amh_left->left->right, E_Amh_Type_NULL)) {
+		free(amh_left->left->right);
+		amh_left->left->right = NULL;
+	}
+
+	const char* array_err_str = "error : expect to ']'";
+
+	if (amh_token_list_expect_str(src_lex_list, "]"))
+		amh_left->op = ast_op_memdup(E_Amh_Type_Array, NULL, 0);
+	else
+		amh_left->op = ast_op_memdup(E_Amh_Type_None, array_err_str, ext_strlen_add_null(array_err_str));
+
+	return amh_left;
+}
+
 Amh_Ast_Nodes* build_ast_amh_pare(Amh_Lex_Token_List* src_lex_list) {
 	if (amh_token_list_expect_str(src_lex_list, "(")) {
 		Amh_Ast_Nodes* amh_right = smart_calloc(Amh_Ast_Nodes, 1);
@@ -950,13 +1142,16 @@ Amh_Ast_Nodes* build_ast_amh_pare(Amh_Lex_Token_List* src_lex_list) {
 		}
 		return amh_right;
 	}
+	if (amh_token_list_expect_str(src_lex_list, "[")) {
+		return build_ast_amh_array_literal(src_lex_list);
+	}
 	return build_ast_amh_basic_token(src_lex_list);
 }
 Amh_Ast_Nodes* build_ast_amh_basic_token(Amh_Lex_Token_List* src_lex_list) {
 	Amh_Ast_Nodes* amh_left = smart_calloc(Amh_Ast_Nodes, 1);
 	if (!amh_left) return NULL;
 
-	const Amh_Lex_Token * now_token = get_now_amh_token(src_lex_list);
+	const Amh_Lex_Token* now_token = get_now_amh_token(src_lex_list);
 	if (!now_token) {
 		amh_left->op = ast_op_memdup(E_Amh_Type_NULL, NULL, 0);
 		return amh_left;
@@ -994,9 +1189,9 @@ Amh_Ast_Nodes* build_ast_amh_basic_token(Amh_Lex_Token_List* src_lex_list) {
 
 			basic_token_err = "error : normal run not consider to none literal";
 			amh_left->op = ast_op_memdup(E_Amh_Type_None, basic_token_err, strlen(basic_token_err) + 1);
-				/*none error
-				amh_left->op = ast_op_memdup(E_Amh_Type_None, NULL, 0);
-			*/
+			/*none error
+			amh_left->op = ast_op_memdup(E_Amh_Type_None, NULL, 0);
+		*/
 
 		}
 		consume_advance_list(src_lex_list);

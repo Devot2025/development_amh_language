@@ -1,19 +1,9 @@
-@:
-loop{}
-loop(1){} => while
-loop(;;){} => for
-break_a => break all(loop nest)
-break => standard break
-:@
-@! currently in development: ast only Very 
-
-i = loop(i = 0; i < 10; i+=1){
-    break_a 1;
-};
-puts(str){
-   ___out_str = "" + str;
-   
-   return ___sys__write(str);
+if(i < 20){
 }
+else(i < 20){
 
-return puts(i);
+}
+else{
+}
+else{
+}

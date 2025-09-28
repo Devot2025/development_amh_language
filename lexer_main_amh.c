@@ -266,7 +266,7 @@ Amh_Lex_Token_List* start_lex_amh_code(const char* amh_file_name, const char* sr
 		if (now_lex_mode == E_Amh_Lex_Normal) {
 			/*normal read mode*/
 
-			if (byte_match_to_list_8(tmp_code_byte, ";(){}")) {
+			if (byte_match_to_list_8(tmp_code_byte, ";(){}[]")) {
 
 				append_lex_token_to_token_list(amh_token, stack_token, E_Amh_Lex_Token_Type_NULL);
 				append_str_buff(stack_token, tmp_code_byte);
