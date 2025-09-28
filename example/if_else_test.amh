@@ -1,3 +1,4 @@
+@ amh if, else if, else
 i = ___sys__read();
 Result_Rank = "";
 if(i < 20){
@@ -12,4 +13,5 @@ else(i < 60){
 else{
    Result_Rank = "D";
 } 
+
 return ___sys__write("rank ==> " + Result_Rank);
