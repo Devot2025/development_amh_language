@@ -1,12 +1,12 @@
-#ifndef _ANS_AST_DEBUG_PRINT_H_
+ï»¿#ifndef _ANS_AST_DEBUG_PRINT_H_
 #define _ANS_AST_DEBUG_PRINT_H_
 #include "parser_main_ans.h"
 #define AST_ENUM_STR_OUT_POS 21
 extern const char* debug_ans_ast_token_str[] = { Bulk_Gen_Ans_Parser_Token(CHANGE_TO_STR) };
 
-#define ANS_AST_SPLIT_LR_TREE  "„¥„Ÿ„Ÿ "
-#define ANS_AST_SPLIT_ONLY_TREE "„¤„Ÿ„Ÿ "
-#define ANS_AST_ONLY_TREE     "„    "
+#define ANS_AST_SPLIT_LR_TREE  "â”œâ”€â”€ "
+#define ANS_AST_SPLIT_ONLY_TREE "â””â”€â”€ "
+#define ANS_AST_ONLY_TREE     "â”‚   "
 #define ANS_AST_END_TREE    "    "
 
 static void print_ast_tree_line(const Ans_Ast_Nodes* src_ans_node, const char* src_prefix, int last_check) {
