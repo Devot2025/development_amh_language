@@ -112,7 +112,7 @@ Top-level return Marks the end of the file’s code; optional
 ## Note: In the current implementation,
 the parser recognizes both function-scope and top-level return statements,
 but runtime evaluation is still under development.
-## 🧩 Development Status
+##  Development Status
 
 | Module | Status | Details |
 |---------|---------|----------|
