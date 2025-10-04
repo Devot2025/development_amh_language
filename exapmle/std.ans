@@ -6,7 +6,7 @@
 Module name: std  (file name: std)
 
 File name and #module:
-  - This filefs name is **"std"**.
+  - This fileâ€™s name is **"std"**.
   - With `#module` (1 file = 1 module) and the Hash Process special rule,
     the **entire file becomes the module "std"**.
   - On import/include, the module is **auto-instantiated (class-like)**.
@@ -14,12 +14,12 @@ File name and #module:
     the same instance.
 
 Purpose:
-  - Provide thin wrappers over the runtimefs virtual I/O primitives
+  - Provide thin wrappers over the runtimeâ€™s virtual I/O primitives
     (____virtual__write / ____virtual__read).
   - Expose ANSI-like helpers for standard streams (stdin=0, stdout=1, stderr=2).
 
-About gHash Processh:
-  - Here, gHash Processh names a special process-layer module in this language/runtime
+About â€œHash Processâ€:
+  - Here, â€œHash Processâ€ names a special process-layer module in this language/runtime
     (not cryptographic hashing). It centralizes low-level I/O so other code uses
     this module rather than calling the raw primitives directly.
 
@@ -30,7 +30,7 @@ Publication model (general vs. special case):
       * Attaching explicit visibility (public/private) **is not allowed** here.
       * All symbols are **implicitly public** and exported.
       * If `private` is explicitly written, its handling is **currently undecided (TBD)**.
-        - Possible futures: gwarn and promote to publich / gcompile-time errorh, etc.
+        - Possible futures: â€œwarn and promote to publicâ€ / â€œcompile-time errorâ€, etc.
         - For now, avoid specifying `private` inside this module.
 
 Design notes:
@@ -44,16 +44,16 @@ abs type rule (type absorption rule)
 
 Overview:
   - Types have a **precedence**; in binary operations the rule set of the
-    **higher-precedence type** governs the operation and conversions (gabsorptionh).
-  - gLower-absorption types follow the rule of higher-absorption types.h
+    **higher-precedence type** governs the operation and conversions (â€œabsorptionâ€).
+  - â€œLower-absorption types follow the rule of higher-absorption types.â€
 
-Precedence (high ¨ low):
+Precedence (high â†’ low):
   ?stack > string >> double > float > int > char > *class > virtuals > $none
 
 Legend:
   >> : very strong precedence (e.g., `string` strongly absorbs others)
    > : normal precedence
-gpredefinedh: per-type special rules can be set separately (note)
+â€œpredefinedâ€: per-type special rules can be set separately (note)
    * : without special handling, cannot be absorbed by higher types
    ? : rule not yet defined
    $ : effectively no absorption / no operation
@@ -68,17 +68,17 @@ Examples:
       "" + 1     -> "1"
       "" + 1.0   -> "1.0"
   - `double` absorbs lower numeric types by widening:
-      1.5 + 1 (int¨double) -> 2.5
+      1.5 + 1 (intâ†’double) -> 2.5
 
 Application in this module:
   - In `ans_puts`, `str + "\n"` resolves to **string concatenation** because of
-    `string`fs very strong absorption (`>>`).
+    `string`â€™s very strong absorption (`>>`).
 --------------------------------------------------------------------------------
 
 Public API (wrappers):
   ans_puts(str)        : write (str + "\n") to stdout
   ans_puts(str, n)     : write up to n units from (str + "\n") to stdout
-  ans_gets()           : read from stdin with the runtimefs default behavior
+  ans_gets()           : read from stdin with the runtimeâ€™s default behavior
   ans_gets(n)          : read up to n units from stdin
 
 Runtime primitives (implementation-defined):
@@ -108,7 +108,7 @@ obj ans_puts(obj str, obj n){
 }
 
 obj ans_gets(){
-	@ Read from stdin using the runtimefs default length/behavior.
+	@ Read from stdin using the runtimeâ€™s default length/behavior.
 	return ____virtual__read(stdin);
 }
 
