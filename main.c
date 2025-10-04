@@ -4,7 +4,7 @@
 #include "parser_main_ans.h"
 #include "ans_ast_debug_print.h"
 int main(void) {
-	Ans_Lex_Token_List* token_list = start_ans_lex_main("std.ans");
+	Ans_Lex_Token_List* token_list = start_ans_lex_main("exapmle/std.ans");
 	ans_token_list_call(token_list);
 	Ans_Hash_Process_List* hash_list = gen_hash_process_list("std.ans");
 	Ans_Ast_Nodes* ast_node = start_parser_ans_ast_main(token_list, hash_list);
@@ -16,4 +16,5 @@ int main(void) {
 	delete_ans_ast_node(ast_node);
 	delete_hash_process_list(hash_list);
 	return 0;
+
 }
