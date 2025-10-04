@@ -1,0 +1,28 @@
+#module
+
+obj ans_puts(obj str){
+	obj ____out__string = str + "\n";
+	return ____virtual__write(stdout, ____out__string);
+}
+
+obj ans_puts(obj str, obj n){
+	obj ____out__string = str + "\n";
+	return ____virtual__write(stdout, ____out__string, n);
+}
+
+obj ans_gets(){
+	return ____virtual__read(stdin);
+}
+
+obj ans_gets(obj n){
+	return ____virtual__read(stdin, n);
+}
+
+obj stdin;
+obj stdout;
+obj stderr;
+
+stdin = 0;
+stdout = 1;
+stderr = 2;
+return 1;
