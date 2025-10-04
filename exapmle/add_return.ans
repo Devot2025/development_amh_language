@@ -2,5 +2,5 @@ obj add(obj x, obj y) {
     return x + y;
 }
 
-obj var = add(x, y);
+obj var = add(1, 2);
 return var;
