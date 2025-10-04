@@ -75,7 +75,8 @@ obj add(obj x, obj y) {
 
 obj var = add(x, y);
 return var;
-🔍 Explanation
+```
+### Explanation
 ## 1. obj Declaration
 
 obj is a generic data type used in ANS.
