@@ -85,7 +85,7 @@ It can hold various types (numbers, strings, or user-defined objects), similar t
 obj var = add(1, 2);
 ```
 
-Here, var is declared as an obj and initialized with the result of the function add(x, y).
+Here, var is declared as an obj and initialized with the result of the function add(1, 2).
 
 ## 2. Function return
 ```ans
