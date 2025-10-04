@@ -63,4 +63,51 @@ Currently supports **Lexical Analysis** and **AST Construction** phases.
 
 ```bash
 gcc main.c ext_alloc.c str_ext.c lexer_main_ans.c hash_process_ans_main.c parser_main_ans.c
+```
+## Example: Basic `obj` Declaration and `return`
 
+Below is a simple example written in **ANS** syntax:
+
+```ans
+obj add(obj x, obj y) {
+    return x + y;
+}
+
+obj var = add(x, y);
+return var;
+🔍 Explanation
+## 1. obj Declaration
+
+obj is a generic data type used in ANS.
+It can hold various types (numbers, strings, or user-defined objects), similar to a dynamically typed variable in high-level languages.
+```ans
+obj var = add(x, y);
+```
+
+Here, var is declared as an obj and initialized with the result of the function add(x, y).
+
+##2. Function return
+```ans
+return x + y;
+```
+
+This return is inside the function scope — it exits the add function and sends the computed value (x + y) back to the caller.
+
+## 3. Top-Level return
+```ans
+return var;
+```
+
+At the top level (outside of any function),
+return behaves as the program’s final output — it ends the program execution and returns the last evaluated value to the runtime environment.
+This is similar to returning an exit value from main() in C.
+
+## Summary
+Concept	Description
+obj	A flexible, dynamically typed object type
+Function return	Returns a value from within a function scope
+Top-level return	Ends program execution and returns a final result
+
+## Note: In the current implementation,
+the parser recognizes both function-scope and top-level return statements,
+but runtime evaluation is still under development.
