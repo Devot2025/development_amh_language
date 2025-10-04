@@ -112,3 +112,12 @@ Top-level return Marks the end of the file’s code; optional
 ## Note: In the current implementation,
 the parser recognizes both function-scope and top-level return statements,
 but runtime evaluation is still under development.
+## 🧩 Development Status
+
+| Module | Status | Details |
+|---------|---------|----------|
+| **Lex** |  Almost complete | Core lexical analysis works fine. Some extensions planned. |
+| **Parser** |  In development | Mostly functional, but still under refinement. |
+| **Hash Process** |  In development | Basic structure implemented, further logic WIP. |
+| **IR / Run** |  Not implemented | Intermediate representation and runtime are not yet developed. |
+
