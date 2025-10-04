@@ -1,0 +1,570 @@
+#include "parser_main_ans.h"
+#include <math.h>
+#include <float.h>
+void decision_final_accurate_binary_type(Ans_Ast_Nodes* src_ans_ast_node, const char* src_str) {
+	const char* tmp_src_str = src_str;
+	bool float_check = false;
+	while (*src_str) if (*(src_str++) == '.') { float_check = true; break; }
+	src_str = tmp_src_str;
+	typedef union tmp_value_datas {
+		float float_data;
+		double double_data;
+		int int_data;
+	}tmp_value_datas;
+	tmp_value_datas tmp_val_data;
+
+	if (float_check) {
+		tmp_val_data.double_data = strtod(src_str, NULL);
+		if (isfinite(tmp_val_data.double_data) && fabs(tmp_val_data.double_data) <= FLT_MAX) {
+			/*float check*/
+			tmp_val_data.float_data = (float)tmp_val_data.double_data;
+			set_up_ast_node_op_datas(src_ans_ast_node, E_Ans_Ast_Token_Type_Float_Value, &tmp_val_data.float_data, sizeof(float));
+		}
+		else {
+			/*double check*/
+			set_up_ast_node_op_datas(src_ans_ast_node, E_Ans_Ast_Token_Type_Double_Value, &tmp_val_data.double_data, sizeof(double));
+		}
+	}
+	else {
+		/* change to python-style infinite int*/
+		tmp_val_data.int_data = (int)strtol(src_str, NULL, 0);
+		set_up_ast_node_op_datas(src_ans_ast_node, E_Ans_Ast_Token_Type_Int_Value, &tmp_val_data.int_data, sizeof(int));
+	}
+}
+
+void decision_final_accurate_specail_value(Ans_Ast_Nodes* src_node, const char* src_now_token_str) {
+	if (simple_strcmp(src_now_token_str, "none")) set_up_ast_node_op_datas(src_node, E_Ans_Ast_Token_Type_None_Value, NULL, 0);
+	else if (simple_strcmp(src_now_token_str, "_______none")) set_up_ast_node_op_datas(src_node, E_Ans_Ast_Token_Type_None_Value, NULL, 0);
+	else if (simple_strcmp(src_now_token_str, "v_em")) set_up_ast_node_op_datas(src_node, E_Ans_Ast_Token_Type_Virtual_Empty_Value, NULL, 0);
+	else set_up_ast_node_op_datas(src_node, E_Ans_Ast_Token_Type_None_Value, "error : not exit specail value", ext_strlen_add_null("error : not exit specail value"));
+}
+Ans_Ast_Token_Type get_match_ans_lex_ast_multi_type(const Ans_Ast_Token_Type* dst_token_type, const char** src_match_lex_str_list, Ans_Lex_Token_List* src_ans_token_list, uint32_t src_match_list_size) {
+	for (uint32_t i = 0; i < src_match_list_size; ++i) if (ans_token_list_expect_token_str(src_ans_token_list, *(src_match_lex_str_list + i)))return *(dst_token_type + i);
+	return E_Ans_Ast_Token_Type_Null;
+}
+Ans_Ast_Token_Type expect_add_sub_type(Ans_Lex_Token_List* src_ans_token_list) {
+	const Ans_Ast_Token_Type dst_add_sub_type_list[] = { E_Ans_Ast_Token_Type_Add, E_Ans_Ast_Token_Type_Sub };
+	const char* dst_add_sub_str_list[] = { "+", "-" };
+	return get_match_ans_lex_ast_multi_type(dst_add_sub_type_list, dst_add_sub_str_list, src_ans_token_list, GET_ARRAY_SIZE(dst_add_sub_str_list));
+}
+
+Ans_Ast_Token_Type expect_mul_div_mod_type(Ans_Lex_Token_List* src_ans_token_list) {
+	const Ans_Ast_Token_Type dst_add_sub_type_list[] = { E_Ans_Ast_Token_Type_Mul, E_Ans_Ast_Token_Type_Div, E_Ans_Ast_Token_Type_Mod };
+	const char* dst_add_sub_str_list[] = { "*", "/", "%" };
+	return get_match_ans_lex_ast_multi_type(dst_add_sub_type_list, dst_add_sub_str_list, src_ans_token_list, GET_ARRAY_SIZE(dst_add_sub_str_list));
+}
+
+Ans_Ast_Token_Type expect_assigment_type(Ans_Lex_Token_List* src_ans_token_list) {
+	const Ans_Ast_Token_Type dst_add_sub_type_list[] = { E_Ans_Ast_Token_Type_Assigment,E_Ans_Ast_Token_Type_Add_Assigment, E_Ans_Ast_Token_Type_Sub_Assigment, E_Ans_Ast_Token_Type_Mul, E_Ans_Ast_Token_Type_Div_Assigment, E_Ans_Ast_Token_Type_Mod_Assigment };
+	const char* dst_add_sub_str_list[] = { "=" ,"+=", "-=", "/=", "*=", "%=" };
+	return get_match_ans_lex_ast_multi_type(dst_add_sub_type_list, dst_add_sub_str_list, src_ans_token_list, GET_ARRAY_SIZE(dst_add_sub_str_list));
+}
+
+Ans_Ast_Token_Type expect_equals_type(Ans_Lex_Token_List* src_ans_token_list) {
+	const Ans_Ast_Token_Type dst_add_sub_type_list[] = { E_Ans_Ast_Token_Type_Assigment,E_Ans_Ast_Token_Type_Add_Assigment, E_Ans_Ast_Token_Type_Sub_Assigment, E_Ans_Ast_Token_Type_Mul, E_Ans_Ast_Token_Type_Div_Assigment, E_Ans_Ast_Token_Type_Mod_Assigment };
+	const char* dst_add_sub_str_list[] = { "==" ,"!=" };
+	return get_match_ans_lex_ast_multi_type(dst_add_sub_type_list, dst_add_sub_str_list, src_ans_token_list, GET_ARRAY_SIZE(dst_add_sub_str_list));
+}
+
+Ans_Ast_Token_Type expect_relation_type(Ans_Lex_Token_List* src_ans_token_list) {
+	const Ans_Ast_Token_Type dst_add_sub_type_list[] = { E_Ans_Ast_Token_Type_Less, E_Ans_Ast_Token_Type_Greater, E_Ans_Ast_Token_Type_Less_Equal, E_Ans_Ast_Token_Type_Greater_Equal };
+	const char* dst_add_sub_str_list[] = { "<" ,">", "<=", ">=" };
+	return get_match_ans_lex_ast_multi_type(dst_add_sub_type_list, dst_add_sub_str_list, src_ans_token_list, GET_ARRAY_SIZE(dst_add_sub_str_list));
+}
+Ans_Ast_Token_Type expect_shift_type(Ans_Lex_Token_List* src_ans_token_list) {
+	const Ans_Ast_Token_Type dst_add_sub_type_list[] = { E_Ans_Ast_Token_Type_Left_Shift, E_Ans_Ast_Token_Type_Right_Shift };
+	const char* dst_add_sub_str_list[] = { "<<" ,">>" };
+	return get_match_ans_lex_ast_multi_type(dst_add_sub_type_list, dst_add_sub_str_list, src_ans_token_list, GET_ARRAY_SIZE(dst_add_sub_str_list));
+}
+Ans_Ast_Token_Type expect_back_ope_type(Ans_Lex_Token_List* src_ans_token_list) {
+	const Ans_Ast_Token_Type dst_add_sub_type_list[] = { E_Ans_Ast_Token_Type_Men_Acc, E_Ans_Ast_Token_Type_Spe_Men_Acc, E_Ans_Ast_Token_Type_Iden_Changer };
+	const char* dst_add_sub_str_list[] = { ".", ":", "::" };
+	return get_match_ans_lex_ast_multi_type(dst_add_sub_type_list, dst_add_sub_str_list, src_ans_token_list, GET_ARRAY_SIZE(dst_add_sub_str_list));
+}
+Ans_Ast_Nodes* start_parser_ans_ast_main(Ans_Lex_Token_List* src_ans_token_list, Ans_Hash_Process_List* src_hash_list) {
+	if (!src_ans_token_list || !src_hash_list)return NULL;
+	return build_ans_ast_abstract_node(src_ans_token_list, src_hash_list);
+}
+Ans_Ast_Nodes* build_ans_ast_abstract_node(Ans_Lex_Token_List* src_ans_token_list, Ans_Hash_Process_List* src_hash_list) {
+	Ans_Ast_Nodes* ans_block = NULL;
+	Ans_Ast_Nodes* tmp_ans_block = NULL;
+	src_ans_token_list->stack_token_list_index = 0;
+	while (src_ans_token_list->stack_token_list_index < src_ans_token_list->stack_token_list_size) {
+		if (!standard_hash_process_ans(src_hash_list, src_ans_token_list)) {
+			continue;
+		}
+		Ans_Ast_Nodes* ans_left = smart_calloc(Ans_Ast_Nodes, 1);
+		if (!ans_left)break;
+
+		Ans_Ast_Nodes* ans_right = build_ans_ast_statement(src_ans_token_list);
+
+		ans_left->right = ans_right;
+		set_up_ast_node_op_datas(ans_left, E_Ans_Ast_Token_Type_Abstract_Host, NULL, 0);
+		if (!ans_block) tmp_ans_block = ans_block = ans_left;
+		else {
+			ans_block->left = ans_left;
+			ans_block = ans_left;
+		}
+	}
+	return tmp_ans_block;
+}
+Ans_Ast_Nodes* build_ans_ast_statement(Ans_Lex_Token_List* src_ans_token_list) {
+	Ans_Ast_Nodes* ans_left;
+	if ((ans_left = build_ans_ast_block(src_ans_token_list)))return ans_left;
+	if (ans_token_list_expect_token_str(src_ans_token_list, ";")) {
+		ans_left = smart_calloc(Ans_Ast_Nodes, 1);
+
+		if (!ans_left)return NULL;
+		set_up_ast_node_op_datas(ans_left, E_Ans_Ast_Token_Type_Expr_Statement, NULL, 0);
+		return ans_left;
+	}
+	if ((ans_left = build_ans_ast_keyword(src_ans_token_list)))return ans_left;
+
+	ans_left = build_ans_ast_expr_comma(src_ans_token_list);
+	return build_ans_ast_expr_statement(src_ans_token_list, ans_left);
+}
+
+Ans_Ast_Nodes* build_ans_ast_keyword(Ans_Lex_Token_List* src_ans_token_list) {
+	if (ans_token_list_expect_token_str(src_ans_token_list, "obj")) {
+		return build_ans_ast_iden_decl(src_ans_token_list);
+	}
+	else if (ans_token_list_expect_token_str(src_ans_token_list, "return")) {
+		return build_ans_ast_host_return(src_ans_token_list);
+	}
+	else if (ans_token_list_expect_token_str(src_ans_token_list, "cls")) {
+	}
+	return NULL;
+}
+
+Ans_Ast_Nodes* build_ans_ast_block(Ans_Lex_Token_List* src_ans_token_list) {
+	if (ans_token_list_expect_token_str(src_ans_token_list, "{")) {
+		int end_check;
+		Ans_Ast_Nodes* ans_right = build_ans_ast_block_process(&end_check, src_ans_token_list);
+		if (!ans_right)return ans_right;
+		Ans_Ast_Nodes* ans_left = set_up_ans_ast(NULL, ans_right, E_Ans_Ast_Token_Type_Block, NULL, 0);
+		if (!ans_left)return ans_right;
+		if (end_check == 0) set_up_ast_node_op_datas(ans_left, E_Ans_Ast_Token_Type_None_Value, "error : extpect to '}' after block.", ext_strlen_add_null("error : extpect to '}' after block."));
+		return ans_left;
+	}
+	return NULL;
+}
+int end_code_ans_ast_block(Ans_Lex_Token_List* src_ans_token_list) {
+	if (ans_token_list_expect_token_str(src_ans_token_list, "}"))return -1;
+	if (src_ans_token_list->stack_token_list_index >= src_ans_token_list->stack_token_list_size)return 0;
+	return 1;
+}
+Ans_Ast_Nodes* build_ans_ast_block_process(int* end_code, Ans_Lex_Token_List* src_ans_token_list) {
+	Ans_Ast_Nodes* ans_block = NULL;
+	Ans_Ast_Nodes* tmp_ans_block = NULL;
+	while ((*end_code = end_code_ans_ast_block(src_ans_token_list)) > 0) {
+		Ans_Ast_Nodes* ans_left = smart_calloc(Ans_Ast_Nodes, 1);
+		if (!ans_left) { *end_code = 0; break; }
+		Ans_Ast_Nodes* ans_right = build_ans_ast_statement(src_ans_token_list);
+
+		ans_left->right = ans_right;
+		set_up_ast_node_op_datas(ans_left, E_Ans_Ast_Token_Type_Abstract_Host, NULL, 0);
+		if (!ans_block) {
+			tmp_ans_block = ans_block = ans_left;
+		}
+		else {
+			ans_block->left = ans_left;
+			ans_block = ans_left;
+		}
+	}
+	return tmp_ans_block;
+}
+Ans_Ast_Nodes* build_ans_ast_iden_decl(Ans_Lex_Token_List* src_ans_token_list) {
+	Ans_Ast_Nodes* ans_left = set_up_ans_ast(NULL, NULL, E_Ans_Ast_Token_Type_Var_Decl, NULL, 0);
+	if (ans_token_list_expect_token_str(src_ans_token_list, ";")) {
+		Ans_Ast_Nodes* ans_right = set_up_ans_ast(ans_left, NULL, E_Ans_Ast_Token_Type_Expr_Statement, NULL, 0);
+		return ans_right ? ans_right : ans_left;
+	}
+
+	Ans_Lex_Token* now_token_list = peek_ans_lex_token(src_ans_token_list);
+	const char* decl_err = "";
+	if (now_token_list->ans_token_type != E_Ans_Lex_Token_Type_Iden) {
+		decl_err = "error : expect to iden after obj.";
+		set_up_ast_node_op_datas(ans_left, E_Ans_Ast_Token_Type_None_Value, decl_err, ext_strlen_add_null(decl_err));
+		return ans_left;
+	}
+	else {
+		set_up_ast_node_op_datas(ans_left, E_Ans_Ast_Token_Type_Var_Decl, now_token_list->ans_token_str, ext_strlen_add_null(now_token_list->ans_token_str));;
+	}
+	consume_ans_lex_token(src_ans_token_list);
+	if (ans_token_list_expect_token_str(src_ans_token_list, "=")) {
+		Ans_Ast_Nodes* ans_right = set_up_ans_ast(NULL, NULL, E_Ans_Ast_Token_Type_Assigment, NULL, 0);
+		if (!ans_right)return ans_left;
+		ans_right->left = ans_left;
+		ans_right->right = build_ans_ast_expr_comma(src_ans_token_list);
+		return build_ans_ast_expr_statement(src_ans_token_list, ans_right);
+	}
+	else if (ans_token_list_expect_token_str(src_ans_token_list, "(")) {
+		ans_left->token_type = E_Ans_Ast_Token_Type_Func_Decl;
+		Ans_Ast_Nodes* ans_args;
+		int end_code = 0;
+		if (ans_token_list_expect_token_str(src_ans_token_list, ")")) {
+			ans_args = set_up_ans_ast(NULL, NULL, E_Ans_Ast_Token_Type_Func_Decl_Args, NULL, 0);
+			ans_left->left = ans_args;
+		}
+		else {
+			ans_args = build_ans_ast_args_decl(&end_code, src_ans_token_list);
+
+			decl_err = "error : expect to ')' after func def";
+			ans_left->left = ans_args;
+
+			if (!ans_token_list_expect_token_str(src_ans_token_list, ")")) {
+				set_up_ast_node_op_datas(ans_left, E_Ans_Ast_Token_Type_None_Value, decl_err, ext_strlen_add_null(decl_err));
+				return ans_left;
+			}
+		}
+		if (end_code == 0) {
+			if (ans_token_list_expect_token_str(src_ans_token_list, "{")) {
+				decl_err = "error : expect to '}' after func def";
+				Ans_Ast_Nodes* block_node = build_ans_ast_block_process(&end_code, src_ans_token_list);
+				if (end_code == 0) set_up_ast_node_op_datas(ans_left, E_Ans_Ast_Token_Type_None_Value, decl_err, ext_strlen_add_null(decl_err));
+				ans_left->right = block_node;
+			}
+			else set_up_ast_node_op_datas(ans_left, E_Ans_Ast_Token_Type_None_Value, decl_err, ext_strlen_add_null(decl_err));
+		}
+		return ans_left;
+	}
+	else {
+		return build_ans_ast_expr_statement(src_ans_token_list, ans_left);
+	}
+}
+Ans_Ast_Nodes* build_ans_ast_args_decl(int* end_code, Ans_Lex_Token_List* src_ans_token_list) {
+	*end_code = 0;
+	Ans_Ast_Nodes* ans_args = NULL;
+	Ans_Ast_Nodes* tmp_ans_args = NULL;
+	const char* args_err = "error : expect to obj after iden.";
+	do {
+		Ans_Ast_Nodes* ans_left = set_up_ans_ast(NULL, NULL, E_Ans_Ast_Token_Type_Func_Decl_Args, NULL, 0);
+		if (!ans_left) {
+			*end_code = 1;
+			break;
+		}
+		if (!ans_token_list_expect_token_str(src_ans_token_list, "obj")) {
+			set_up_ast_node_op_datas(ans_left, E_Ans_Ast_Token_Type_None_Value, args_err, ext_strlen_add_null(args_err));
+			*end_code = 1;
+
+			if (!ans_args)tmp_ans_args = ans_left;
+			else ans_args->left = ans_left;
+			break;
+		}
+		Ans_Lex_Token* now_token_type = peek_ans_lex_token(src_ans_token_list);
+		if (!now_token_type) {
+			set_up_ans_ast(ans_left, NULL, E_Ans_Ast_Token_Type_None_Value, args_err, ext_strlen_add_null(args_err));
+			*end_code = 1;
+
+			if (!ans_args)tmp_ans_args = ans_left;
+			else ans_args->left = ans_left;
+			break;
+		}
+		if (now_token_type->ans_token_type == E_Ans_Lex_Token_Type_Iden) {
+			set_up_ast_node_op_datas(ans_left, E_Ans_Ast_Token_Type_Func_Decl_Args, now_token_type->ans_token_str, ext_strlen_add_null(now_token_type->ans_token_str));
+			consume_ans_lex_token(src_ans_token_list);
+			if (!ans_args)tmp_ans_args = ans_args = ans_left;
+			else {
+				ans_args->left = ans_left;
+				ans_args = ans_left;
+			}
+		}
+		else {
+			set_up_ans_ast(ans_left, NULL, E_Ans_Ast_Token_Type_None_Value, args_err, ext_strlen_add_null(args_err));
+			*end_code = 1;
+			if (!ans_args)tmp_ans_args = ans_left;
+			else ans_args->left = ans_left;
+			break;
+		}
+	} while (ans_token_list_expect_token_str(src_ans_token_list, ","));
+
+	return tmp_ans_args;
+}
+Ans_Ast_Nodes* build_ans_ast_host_return(Ans_Lex_Token_List* src_ans_token_list) {
+	Ans_Ast_Nodes* ans_left = set_up_ans_ast(NULL, NULL, E_Ans_Ast_Token_Type_Host_Return, NULL, 0);
+	if (ans_token_list_expect_token_str(src_ans_token_list, ";"))return ans_left;
+	ans_left->right = build_ans_ast_expr_comma(src_ans_token_list);
+	return build_ans_ast_expr_statement_err(src_ans_token_list, ans_left);
+}
+
+Ans_Ast_Nodes* build_ans_ast_expr_statement_err(Ans_Lex_Token_List* src_ans_token_list, Ans_Ast_Nodes* src_left) {
+	if (!ans_token_list_expect_token_str(src_ans_token_list, ";")) {
+		const char* expr_statement_err_base = "error : expect to ';' after ";
+		const Ans_Lex_Token* now_lex_token = peek_ans_lex_token(src_ans_token_list);
+		const char* now_token_str = now_lex_token ? now_lex_token->ans_token_str : "end code";
+		size_t err_len = strlen(expr_statement_err_base);
+		size_t token_len = ext_strlen_add_null(now_token_str);
+		char* expr_statement_err = smart_calloc(char, token_len + err_len);
+		if (expr_statement_err) {
+			memcpy(expr_statement_err, expr_statement_err_base, err_len);
+			memcpy(expr_statement_err + err_len, now_token_str, token_len);
+			set_up_ast_node_op_datas(src_left, E_Ans_Ast_Token_Type_None_Value, expr_statement_err, token_len + err_len);
+			free(expr_statement_err);
+		}
+	}
+	return src_left;
+}
+Ans_Ast_Nodes* build_ans_ast_expr_statement(Ans_Lex_Token_List* src_ans_token_list, Ans_Ast_Nodes* src_left) {
+	Ans_Ast_Nodes* ans_left = set_up_ans_ast(src_left, NULL, E_Ans_Ast_Token_Type_Expr_Statement, NULL, 0);
+	if (!ans_left)return ans_left;
+	return build_ans_ast_expr_statement_err(src_ans_token_list, ans_left);
+}
+Ans_Ast_Nodes* build_ans_ast_expr_comma(Ans_Lex_Token_List* src_ans_token_list) {
+	Ans_Ast_Nodes* ans_left = build_ans_ast_assigment(src_ans_token_list);
+	while (ans_token_list_expect_token_str(src_ans_token_list, ",")) {
+		Ans_Ast_Nodes* ans_right = smart_calloc(Ans_Ast_Nodes, 1);
+		if (!ans_right)break;
+		ans_right->left = ans_left;
+		set_up_ast_node_op_datas(ans_right, E_Ans_Ast_Token_Type_Expr_Comma, NULL, 0);
+		ans_right->right = build_ans_ast_assigment(src_ans_token_list);
+		ans_left = ans_right;
+	}
+	return ans_left;
+}
+Ans_Ast_Nodes* build_ans_ast_assigment(Ans_Lex_Token_List* src_ans_token_list) {
+	Ans_Ast_Nodes* ans_left = build_ans_ast_bit_or(src_ans_token_list);
+	Ans_Ast_Token_Type tmp_type;
+	while ((tmp_type = expect_assigment_type(src_ans_token_list))) {
+		Ans_Ast_Nodes* ans_right = smart_calloc(Ans_Ast_Nodes, 1);
+		if (!ans_right)break;
+		ans_right->left = ans_left;
+		set_up_ast_node_op_datas(ans_right, tmp_type, NULL, 0);
+		ans_right->right = build_ans_ast_assigment(src_ans_token_list);
+		ans_left = ans_right;
+	}
+	return ans_left;
+}
+
+Ans_Ast_Nodes* build_ans_ast_bit_or(Ans_Lex_Token_List* src_ans_token_list) {
+	Ans_Ast_Nodes* ans_left = build_ans_ast_bit_xor(src_ans_token_list);
+	while (ans_token_list_expect_token_str(src_ans_token_list, "|")) {
+		Ans_Ast_Nodes* ans_right = smart_calloc(Ans_Ast_Nodes, 1);
+		if (!ans_right) break;
+		ans_right->left = ans_left;
+		set_up_ast_node_op_datas(ans_right, E_Ans_Ast_Token_Type_Or, NULL, 0);
+		ans_right->right = build_ans_ast_bit_xor(src_ans_token_list);
+		ans_left = ans_right;
+	}
+	return ans_left;
+}
+Ans_Ast_Nodes* build_ans_ast_bit_xor(Ans_Lex_Token_List* src_ans_token_list) {
+	Ans_Ast_Nodes* ans_left = build_ans_ast_bit_and(src_ans_token_list);
+	while (ans_token_list_expect_token_str(src_ans_token_list, "^")) {
+		Ans_Ast_Nodes* ans_right = smart_calloc(Ans_Ast_Nodes, 1);
+		if (!ans_right) break;
+		ans_right->left = ans_left;
+		set_up_ast_node_op_datas(ans_right, E_Ans_Ast_Token_Type_Xor, NULL, 0);
+		ans_right->right = build_ans_ast_bit_and(src_ans_token_list);
+		ans_left = ans_right;
+	}
+	return ans_left;
+}
+Ans_Ast_Nodes* build_ans_ast_bit_and(Ans_Lex_Token_List* src_ans_token_list) {
+	Ans_Ast_Nodes* ans_left = build_ans_ast_equlas(src_ans_token_list);
+	while (ans_token_list_expect_token_str(src_ans_token_list, "&")) {
+		Ans_Ast_Nodes* ans_right = smart_calloc(Ans_Ast_Nodes, 1);
+		if (!ans_right) break;
+		ans_right->left = ans_left;
+		set_up_ast_node_op_datas(ans_right, E_Ans_Ast_Token_Type_And, NULL, 0);
+		ans_right->right = build_ans_ast_equlas(src_ans_token_list);
+		ans_left = ans_right;
+	}
+	return ans_left;
+}
+
+Ans_Ast_Nodes* build_ans_ast_equlas(Ans_Lex_Token_List* src_ans_token_list) {
+	Ans_Ast_Nodes* ans_left = build_ans_ast_relation(src_ans_token_list);
+	Ans_Ast_Token_Type tmp_type;
+	while ((tmp_type = expect_equals_type(src_ans_token_list))) {
+		Ans_Ast_Nodes* ans_right = smart_calloc(Ans_Ast_Nodes, 1);
+		if (!ans_right)break;
+		ans_right->left = ans_left;
+		set_up_ast_node_op_datas(ans_right, tmp_type, NULL, 0);
+		ans_right->right = build_ans_ast_relation(src_ans_token_list);
+		ans_left = ans_right;
+	}
+	return ans_left;
+}
+
+Ans_Ast_Nodes* build_ans_ast_relation(Ans_Lex_Token_List* src_ans_token_list) {
+	Ans_Ast_Nodes* ans_left = build_ans_ast_shift(src_ans_token_list);
+	Ans_Ast_Token_Type tmp_type;
+	while ((tmp_type = expect_relation_type(src_ans_token_list))) {
+		Ans_Ast_Nodes* ans_right = smart_calloc(Ans_Ast_Nodes, 1);
+		if (!ans_right)break;
+		ans_right->left = ans_left;
+		set_up_ast_node_op_datas(ans_right, tmp_type, NULL, 0);
+		ans_right->right = build_ans_ast_shift(src_ans_token_list);
+		ans_left = ans_right;
+	}
+	return ans_left;
+}
+Ans_Ast_Nodes* build_ans_ast_shift(Ans_Lex_Token_List* src) {
+	Ans_Ast_Nodes* ans_left = build_ans_ast_add_sub(src);
+	Ans_Ast_Token_Type tmp_type;
+	while ((tmp_type = expect_shift_type(src))) {
+		Ans_Ast_Nodes* ans_right = smart_calloc(Ans_Ast_Nodes, 1);
+		if (!ans_right) break;
+		ans_right->left = ans_left;
+		set_up_ast_node_op_datas(ans_right, tmp_type, NULL, 0);
+		ans_right->right = build_ans_ast_add_sub(src);
+		ans_left = ans_right;
+	}
+	return ans_left;
+}
+
+Ans_Ast_Nodes* build_ans_ast_add_sub(Ans_Lex_Token_List* src_ans_token_list) {
+	Ans_Ast_Nodes* ans_left = build_ans_ast_mul_div_mod(src_ans_token_list);
+	Ans_Ast_Token_Type tmp_type;
+	while ((tmp_type = expect_add_sub_type(src_ans_token_list))) {
+		Ans_Ast_Nodes* ans_right = smart_calloc(Ans_Ast_Nodes, 1);
+		if (!ans_right)break;
+		ans_right->left = ans_left;
+		set_up_ast_node_op_datas(ans_right, tmp_type, NULL, 0);
+		ans_right->right = build_ans_ast_mul_div_mod(src_ans_token_list);
+		ans_left = ans_right;
+	}
+	return ans_left;
+}
+Ans_Ast_Nodes* build_ans_ast_mul_div_mod(Ans_Lex_Token_List* src_ans_token_list) {
+	Ans_Ast_Nodes* ans_left = build_ans_ast_sign_symbol(src_ans_token_list);
+	Ans_Ast_Token_Type tmp_type;
+	while ((tmp_type = expect_mul_div_mod_type(src_ans_token_list))) {
+		Ans_Ast_Nodes* ans_right = smart_calloc(Ans_Ast_Nodes, 1);
+		if (!ans_right)break;
+		ans_right->left = ans_left;
+		set_up_ast_node_op_datas(ans_right, tmp_type, NULL, 0);
+		ans_right->right = build_ans_ast_sign_symbol(src_ans_token_list);
+		ans_left = ans_right;
+	}
+
+	return ans_left;
+}
+
+Ans_Ast_Nodes* build_ans_ast_sign_symbol(Ans_Lex_Token_List* src_ans_token_list) {
+	if (ans_token_list_expect_token_str(src_ans_token_list, "+")) {
+		Ans_Ast_Nodes* ans_right = build_ans_ast_sign_symbol(src_ans_token_list);
+		return ans_right;
+	}
+	else if (ans_token_list_expect_token_str(src_ans_token_list, "-")) {
+		Ans_Ast_Nodes* ans_left = smart_calloc(Ans_Ast_Nodes, 1);
+		if (!ans_left)return NULL;
+		Ans_Ast_Nodes* ans_right = build_ans_ast_sign_symbol(src_ans_token_list);
+		set_up_ast_node_op_datas(ans_left, E_Ans_Ast_Token_Type_Sub, NULL, 0);
+		ans_left->right = ans_right;
+		return ans_left;
+	}
+
+	else if (ans_token_list_expect_token_str(src_ans_token_list, "~")) {
+		Ans_Ast_Nodes* ans_left = smart_calloc(Ans_Ast_Nodes, 1);
+		if (!ans_left)return NULL;
+		Ans_Ast_Nodes* ans_right = build_ans_ast_sign_symbol(src_ans_token_list);
+		set_up_ast_node_op_datas(ans_left, E_Ans_Ast_Token_Type_Not, NULL, 0);
+		ans_left->right = ans_right;
+		return ans_left;
+	}
+
+	else if (ans_token_list_expect_token_str(src_ans_token_list, "!")) {
+		Ans_Ast_Nodes* ans_left = smart_calloc(Ans_Ast_Nodes, 1);
+		if (!ans_left)return NULL;
+		Ans_Ast_Nodes* ans_right = build_ans_ast_sign_symbol(src_ans_token_list);
+		set_up_ast_node_op_datas(ans_left, E_Ans_Ast_Token_Type_Not_Logic, NULL, 0);
+		ans_left->right = ans_right;
+		return ans_left;
+	}
+	else return build_ans_ast_back_ope(src_ans_token_list);
+}
+
+Ans_Ast_Nodes* build_ans_ast_back_ope(Ans_Lex_Token_List* src_ans_token_list) {
+	Ans_Ast_Nodes* ans_left = build_ans_ast_function(src_ans_token_list);
+	Ans_Ast_Token_Type tmp_type;
+	while ((tmp_type = expect_back_ope_type(src_ans_token_list))) {
+		Ans_Ast_Nodes* ans_right = smart_calloc(Ans_Ast_Nodes, 1);
+		if (!ans_right)break;
+		ans_right->left = ans_left;
+		set_up_ast_node_op_datas(ans_right, tmp_type, NULL, 0);
+		ans_right->right = build_ans_ast_function(src_ans_token_list);
+		ans_left = ans_right;
+	}
+	return ans_left;
+}
+Ans_Ast_Nodes* build_ans_ast_function_args(Ans_Lex_Token_List* src_ans_token_list) {
+	Ans_Ast_Nodes* ans_left = build_ans_ast_assigment(src_ans_token_list);
+	Ans_Ast_Nodes* ans_args = set_up_ans_ast(ans_left, NULL, E_Ans_Ast_Token_Type_Func_Args, NULL, 0);
+	if (!ans_args)return NULL;
+
+	while (ans_token_list_expect_token_str(src_ans_token_list, ",")) {
+		Ans_Ast_Nodes* ans_right = smart_calloc(Ans_Ast_Nodes, 1);
+		if (!ans_right)break;
+		ans_right->left = ans_args;
+		set_up_ast_node_op_datas(ans_right, E_Ans_Ast_Token_Type_Func_Args, NULL, 0);
+		ans_right->right = build_ans_ast_assigment(src_ans_token_list);
+		ans_args = ans_right;
+	}
+
+	return ans_args;
+}
+Ans_Ast_Nodes* build_ans_ast_function(Ans_Lex_Token_List* src_ans_token_list) {
+	Ans_Ast_Nodes* ans_left = build_ans_ast_pare(src_ans_token_list);
+	while (ans_token_list_expect_token_str(src_ans_token_list, "(")) {
+		Ans_Ast_Nodes* ans_right = smart_calloc(Ans_Ast_Nodes, 1);
+		if (ans_right) {
+			ans_right->left = ans_left;
+			if (ans_token_list_expect_token_str(src_ans_token_list, ")")) {
+				ans_right->right = set_up_ans_ast(NULL, NULL, E_Ans_Ast_Token_Type_Func_Args, NULL, 0);
+				set_up_ast_node_op_datas(ans_right, E_Ans_Ast_Token_Type_Func_Use, NULL, 0);
+			}
+			else {
+				ans_right->right = build_ans_ast_function_args(src_ans_token_list);
+				if (ans_token_list_expect_token_str(src_ans_token_list, ")"))
+					set_up_ast_node_op_datas(ans_right, E_Ans_Ast_Token_Type_Func_Use, NULL, 0);
+				else
+					set_up_ast_node_op_datas(ans_right, E_Ans_Ast_Token_Type_None_Value, "error : expect to ')' after func use", ext_strlen_add_null("error : expect to ')' after func use"));
+			}
+			ans_left = ans_right;
+		}
+	}
+	return ans_left;
+}
+Ans_Ast_Nodes* build_ans_ast_pare(Ans_Lex_Token_List* src_ans_token_list) {
+	if (ans_token_list_expect_token_str(src_ans_token_list, "(")) {
+		Ans_Ast_Nodes* ans_left = smart_calloc(Ans_Ast_Nodes, 1);
+		if (!ans_left)return NULL;
+		ans_left->right = build_ans_ast_expr_comma(src_ans_token_list);
+		if (ans_token_list_expect_token_str(src_ans_token_list, ")")) set_up_ast_node_op_datas(ans_left, E_Ans_Ast_Token_Type_Expr_Comma, NULL, 0);
+		else set_up_ast_node_op_datas(ans_left, E_Ans_Ast_Token_Type_None_Value, "error : expect to ')'", ext_strlen_add_null("error : expect to ')'"));
+		return ans_left;
+	}
+	return build_ans_ast_basic_token(src_ans_token_list);
+}
+
+Ans_Ast_Nodes* build_ans_ast_basic_token(Ans_Lex_Token_List* src_ans_token_list) {
+	Ans_Lex_Token* now_token_list = peek_ans_lex_token(src_ans_token_list);
+	if (!now_token_list)return NULL;
+	Ans_Ast_Nodes* ans_left = smart_calloc(Ans_Ast_Nodes, 1);
+	if (!ans_left)return NULL;
+	const char* error_str = "error : expect to operator.";
+
+	switch (now_token_list->ans_token_type) {
+	case E_Ans_Lex_Token_Type_Iden:
+		set_up_ast_node_op_datas(ans_left, E_Ans_Ast_Token_Type_Iden, now_token_list->ans_token_str, ext_strlen_add_null(now_token_list->ans_token_str));
+		break;
+	case E_Ans_Lex_Token_Type_Value_Literal:
+		decision_final_accurate_binary_type(ans_left, now_token_list->ans_token_str);
+		break;
+	case E_Ans_Lex_Token_Type_Special_Literal:
+		decision_final_accurate_specail_value(ans_left, now_token_list->ans_token_str);
+
+		break;
+
+	case E_Ans_Lex_Token_Type_Str_Literal:
+		set_up_ast_node_op_datas(ans_left, E_Ans_Ast_Token_Type_String_Value, now_token_list->ans_token_str, ext_strlen_add_null(now_token_list->ans_token_str));
+		break;
+	default:
+		set_up_ast_node_op_datas(ans_left, E_Ans_Ast_Token_Type_None_Value, error_str, ext_strlen_add_null(error_str));
+		break;
+	}
+	consume_ans_lex_token(src_ans_token_list);
+
+	return ans_left;
+}
