@@ -57,10 +57,10 @@ Currently supports **Lexical Analysis** and **AST Construction** phases.
 
 ---
 
-## 🚀 Build & Run
+##  Build & Run
 
 ### 1. Build
 
 ```bash
-gcc main.c -o ansc
+gcc main.c ext_alloc.c str_ext.c lexer_main_ans.c hash_process_ans_main.c parser_main_ans.c
 
