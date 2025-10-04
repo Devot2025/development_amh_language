@@ -108,6 +108,29 @@ Concept Description
 obj A flexible, dynamically typed object type
 Function return Returns a value from within a function scope (optional) 
 Top-level return Marks the end of the file’s code; optional 
+## Example AST Structure
+
+```text
+Abstract_Host
+├── (add)Func_Decl
+│   ├── (x)Func_Decl_Args
+│   ├── (y)Func_Decl_Args
+│   └── Abstract_Host
+│       └── Host_Return
+│           └── Add
+│               ├── (x)Iden
+│               └── (y)Iden
+├── Expr_Statement
+│   └── Assigment
+│       ├── (var)Var_Decl
+│       └── Func_Use
+│           ├── (add)Iden
+│           └── Func_Args
+│               ├── Func_Args
+│               │   └── (x)Iden
+│               └── (y)Iden
+└── Host_Return
+    └── (var)Iden
 
 ## Note: In the current implementation,
 the parser recognizes both function-scope and top-level return statements,
