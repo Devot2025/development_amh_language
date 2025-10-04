@@ -1,0 +1,6 @@
+obj add(obj x, obj y) {
+    return x + y;
+}
+
+obj var = add(x, y);
+return var;
