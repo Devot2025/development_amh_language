@@ -1,8 +1,0 @@
-@:
-comment out
-:@
-@! comment out
-@ comment out
-i = ___sys__read(0  @:stdint:@);
-@ toplevel return
-return ___sys__write(0, "hello world! : " + i);

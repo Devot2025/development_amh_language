@@ -1,8 +1,0 @@
-loop{
-	t = loop(i < 0){
-		loop(j = 0;j < 10; j += 1){
-			break_a 10;
-		}
-	
-	} + 1;
-}

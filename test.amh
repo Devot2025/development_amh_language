@@ -1,9 +1,0 @@
-@! stdout -> test
-@:
-	test,test
-	test,test
-:@
-@
-xx=1;
-func(){
-}
