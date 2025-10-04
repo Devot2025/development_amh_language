@@ -93,21 +93,21 @@ return x + y;
 ```
 
 This return is inside the function scope — it exits the add function and sends the computed value (x + y) back to the caller.
+In ANS, the return statement is optional; if omitted, the function implicitly returns the last evaluated expression.
 
 ## 3. Top-Level return
 ```ans
 return var;
 ```
-
 At the top level (outside of any function),
-return behaves as the program’s final output — it ends the program execution and returns the last evaluated value to the runtime environment.
-This is similar to returning an exit value from main() in C.
+return indicates the end of the file’s code and provides the final value of the program.
+This statement is also optional — the program naturally ends after the last expression if no return is written. 
 
 ## Summary
-Concept	Description
-obj	A flexible, dynamically typed object type
-Function return	Returns a value from within a function scope
-Top-level return	Ends program execution and returns a final result
+Concept Description
+obj A flexible, dynamically typed object type
+Function return Returns a value from within a function scope (optional) 
+Top-level return Marks the end of the file’s code; optional 
 
 ## Note: In the current implementation,
 the parser recognizes both function-scope and top-level return statements,
