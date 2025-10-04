@@ -73,7 +73,7 @@ obj add(obj x, obj y) {
     return x + y;
 }
 
-obj var = add(x, y);
+obj var = add(1, 2);
 return var;
 ```
 ### Explanation
@@ -82,7 +82,7 @@ return var;
 obj is a generic data type used in ANS.
 It can hold various types (numbers, strings, or user-defined objects), similar to a dynamically typed variable in high-level languages.
 ```ans
-obj var = add(x, y);
+obj var = add(1, 2);
 ```
 
 Here, var is declared as an obj and initialized with the result of the function add(x, y).
@@ -127,8 +127,8 @@ Abstract_Host
 │           ├── (add)Iden
 │           └── Func_Args
 │               ├── Func_Args
-│               │   └── (x)Iden
-│               └── (y)Iden
+│               │   └── (1)Iden
+│               └── (2)Iden
 └── Host_Return
     └── (var)Iden
 ```
