@@ -87,7 +87,7 @@ obj var = add(x, y);
 
 Here, var is declared as an obj and initialized with the result of the function add(x, y).
 
-##2. Function return
+## 2. Function return
 ```ans
 return x + y;
 ```
