@@ -131,7 +131,7 @@ Abstract_Host
 │               └── (y)Iden
 └── Host_Return
     └── (var)Iden
-
+```
 ## Note: In the current implementation,
 the parser recognizes both function-scope and top-level return statements,
 but runtime evaluation is still under development.
