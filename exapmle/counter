@@ -1,0 +1,65 @@
+#class
+
+@ Public area
+pbl{
+    obj count;
+
+    obj init(){
+        count = 0;
+    }
+
+    obj add(){
+        count = count + 1;
+    }
+
+    obj reset(){
+        count = 0;
+    }
+
+    obj show(){
+        print("Count: " + count);
+    }
+}
+
+@ +{} is the short form of public area
++{
+    obj quickAdd(){
+        count = count + 10;
+    }
+}
+
+@ Private area
+prv{
+    obj secret;
+
+    obj hideValue(v){
+        secret = v;
+    }
+}
+
+@ -{} is the short form of private area
+-{
+    obj getHidden(){
+        return secret;
+    }
+}
+
+@ Protected area
+prt{
+    obj backup;
+
+    obj save(){
+        backup = count;
+    }
+
+    obj restore(){
+        count = backup;
+    }
+}
+
+@ %{} is the short form of protected area
+%{
+    obj protectTest(){
+        print("Protected function works.");
+    }
+}
