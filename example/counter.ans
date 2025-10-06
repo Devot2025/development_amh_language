@@ -8,7 +8,7 @@ pbl{
     obj init(){
         count = 0;
         @ low-level output only (no print)
-        ____virtual__write(stdout, "init done\n");
+        ____virtual__write(stdout, "init done" + "\n");
     }
 
     obj add(){
@@ -20,7 +20,7 @@ pbl{
     obj reset(){
         count = 0;
         @ low-level output only (no print)
-        ____virtual__write(stdout, "reset: count = 0\n");
+        ____virtual__write(stdout, "reset: count = 0" + "\n");
     }
 
     obj show_status(){
@@ -41,7 +41,7 @@ pbl{
 prv{
     obj secret;
 
-    obj hide_value(v){
+    obj hide_value(obj v){
         secret = v;
         @ no output here (private)
     }
@@ -72,7 +72,7 @@ prt{
 @ %{} is the short form of protected area
 %{
     obj protect_test(){
-        ____virtual__write(stdout, "protected function works.\n");
+        ____virtual__write(stdout, "protected function works." + "\n");
     }
 }
 return 0;
