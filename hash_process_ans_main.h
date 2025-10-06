@@ -19,12 +19,24 @@ typedef struct Ans_Ast_Nodes Ans_Ast_Nodes;
 #define HASH_PROCESS_LIB_ID 1 << 3
 
 #define hash_process_ans_si_strap static inline
+
 typedef uint32_t hash_id;
 typedef struct Ans_Hash_Process_List {
 	hash_id file_modularization_process;
 	hash_id file_depency_process;
 	char* abstract_host_name;
 }Ans_Hash_Process_List;
+
+typedef struct Ans_Class_Hash_Nodes {
+	Ans_Ast_Nodes* public_decl_node;
+	Ans_Ast_Nodes* tmp_public_decl_node;
+	Ans_Ast_Nodes* private_decl_node;
+	Ans_Ast_Nodes* tmp_private_decl_node;
+	Ans_Ast_Nodes* protected_decl_node;
+	Ans_Ast_Nodes* tmp_protected_decl_node;
+	Ans_Ast_Nodes* toplevel_statement_node;
+	Ans_Ast_Nodes* tmp_toplevel_statement_node;
+}Ans_Class_Hash_Nodes;
 hash_process_ans_si_strap Ans_Hash_Process_List* gen_hash_process_list(const char* ans_file_name) {
 	if (!ans_file_name)return NULL;
 	const char* cache_ans_file_name = ans_file_name;
@@ -50,6 +62,11 @@ hash_process_ans_si_strap Ans_Hash_Process_List* delete_hash_process_list(Ans_Ha
 }
 bool standard_hash_process_ans(Ans_Hash_Process_List* src_hash_process_list, Ans_Lex_Token_List* src_token_list);
 void start_hash_process_main(Ans_Ast_Nodes** src_ast_node, Ans_Hash_Process_List* src_hash_process_list);
+Ans_Ast_Nodes* change_to_class_hash_process(Ans_Ast_Nodes* src_ast_node, const char* class_name);
+Ans_Ast_Nodes* build_ans_ast_block(Ans_Lex_Token_List* src_ans_token_list);
+Ans_Ast_Nodes* get_to_none_value_of_class_field_node(Ans_Ast_Nodes* src_ans_node);
+Ans_Ast_Nodes* get_to_block_node(Ans_Ast_Nodes* src_ans_node);
+void change_to_class_hash_process_block(Ans_Ast_Nodes* src_ast_node, Ans_Class_Hash_Nodes* src_ans_class_hash_node);
 Ans_Ast_Nodes* delete_chain_ans_ast_build(Ans_Ast_Nodes* src_ast_node);
 Ans_Ast_Nodes* delete_module_only_build(Ans_Ast_Nodes* src_ast_filed_node, Ans_Ast_Nodes* src_ast_host_node, Ans_Ast_Nodes* src_ast_toplevel_node, Ans_Ast_Nodes* src_ast_class_node);
 Ans_Ast_Nodes* change_to_module_hash_process(Ans_Ast_Nodes* src_ast_node, const char* module_name);

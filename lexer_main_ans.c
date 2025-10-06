@@ -106,6 +106,11 @@ void ans_normal_token_process(Str_Buffer_Array* src_stack_token, Ans_Lex_Token_L
 	else if (now_byte_code == '.') {
 		*src_lex_mode = E_Lex_Mode_Dot;
 	}
+	else if (now_byte_code == '`') {
+		append_lex_token_to_token_list(src_lex_token, src_stack_token, E_Ans_Lex_Token_Type_NULL);
+		append_str_buff(src_stack_token, now_byte_code);
+		append_lex_token_to_token_list(src_lex_token, src_stack_token, E_Ans_Lex_Token_Type_Operator);
+	}
 	else if (now_byte_code == '@') {
 		/*token iden*/
 		/*comment mode*/
@@ -123,7 +128,7 @@ void ans_normal_token_process(Str_Buffer_Array* src_stack_token, Ans_Lex_Token_L
 }
 bool ans_operator_token_process(Str_Buffer_Array* src_stack_token, Ans_Lex_Token_List* src_lex_token, Lex_Ans_Mode* src_lex_mode, const char now_byte_code) {
 	const char* two_byte_ope_list[] = {
-		"==", "!=", "+=", "-=", "*=","/=", "%=", "<=", ">=", "^=", "~=", "|=", "&=", "::", "++", "--", "<<", ">>"
+		"==", "!=", "+=", "-=", "*=","/=", "%=", "<=", ">=", "^=", "~=", "|=", "&=", "::", "++", "--", "<<", ">>", "+{", "-{", "%{"
 	};
 	append_str_buff(src_stack_token, now_byte_code);
 
@@ -305,7 +310,7 @@ Ans_Lex_Token_Type decision_token_type_standard(const char* src_token) {
 }
 bool check_to_token_keyword(const char* src_token) {
 	const char* keyword_token_list[] = {
-		"loop", "if", "else", "break_a", "break", "pbl", "prv", "prt","fld", "mod", "obj", "ext","cls"
+		"loop", "if", "else", "break_a", "break", "pbl", "prv", "prt","fld", "del","mod", "obj", "ext","cls",
 		"int", "float", "double", "char", "string", "virtuals", "none", "array", "return", "albtype", "switch", NULL
 	};
 
@@ -351,6 +356,17 @@ bool ans_token_list_expect_token_str(Ans_Lex_Token_List* src_token_list, const c
 	if (!src_token_list->stack_tokens)return false;
 	Ans_Lex_Token* tmp_token = src_token_list->stack_tokens + src_token_list->stack_token_list_index;
 	if (simple_strcmp(tmp_token->ans_token_str, src_token_str)) {
+		s_free(tmp_token->ans_token_str);
+		src_token_list->stack_token_list_index++;
+		return true;
+	}
+	else return false;
+}
+bool ans_token_list_expect_token_data(Ans_Lex_Token_List* src_token_list, Ans_Lex_Token_Type src_token_type, const char* src_tokem_str) {
+	if (src_token_list->stack_token_list_index >= src_token_list->stack_token_list_size) return false;
+	if (!src_token_list->stack_tokens)return false;
+	Ans_Lex_Token* tmp_token = src_token_list->stack_tokens + src_token_list->stack_token_list_index;
+	if (simple_strcmp(tmp_token->ans_token_str, src_tokem_str) && tmp_token->ans_token_type == src_token_type) {
 		s_free(tmp_token->ans_token_str);
 		src_token_list->stack_token_list_index++;
 		return true;

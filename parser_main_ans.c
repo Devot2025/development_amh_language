@@ -1,6 +1,27 @@
 #include "parser_main_ans.h"
 #include <math.h>
 #include <float.h>
+void build_ans_ast_field_node(Ans_Ast_Nodes** src_tmp_field_node, Ans_Ast_Nodes** src_field_node, Ans_Ast_Token_Type src_field_type, Ans_Lex_Token_List* src_ans_token_list) {
+	Ans_Ast_Nodes* filed_decl_node = set_up_ans_ast(NULL, build_ans_ast_class_field_decl(src_ans_token_list), src_field_type, NULL, 0);
+	if (!*src_field_node)*src_tmp_field_node = *src_field_node = filed_decl_node;
+	else {
+		(*src_field_node)->left = filed_decl_node;
+		*src_field_node = filed_decl_node;
+	}
+}
+Ans_Field_Type_Cache* gen_and_chain_ans_field_cache(Ans_Field_Type_Cache * src_field_cache, Ans_Ast_Token_Type src_field_type) {
+	Ans_Field_Type_Cache* new_field_type_cache = smart_calloc(Ans_Field_Type_Cache, 1);
+	if (!new_field_type_cache)return src_field_cache;
+	new_field_type_cache->field_type = src_field_type;
+	new_field_type_cache->next_field = src_field_cache;
+	return new_field_type_cache;
+}
+
+bool check_to_only_expr_keyword(Ans_Ast_Nodes* src_ast_node) {
+	if (!src_ast_node)return false;
+	if (src_ast_node->token_type == E_Ans_Ast_Token_Type_Loop && src_ast_node->right)return true;
+	return false;
+}
 void decision_final_accurate_binary_type(Ans_Ast_Nodes* src_ans_ast_node, const char* src_str) {
 	const char* tmp_src_str = src_str;
 	bool float_check = false;
@@ -112,18 +133,23 @@ Ans_Ast_Nodes* build_ans_ast_statement(Ans_Lex_Token_List* src_ans_token_list) {
 	Ans_Ast_Nodes* ans_left;
 	if ((ans_left = build_ans_ast_block(src_ans_token_list)))return ans_left;
 	if (ans_token_list_expect_token_str(src_ans_token_list, ";")) {
-		ans_left = smart_calloc(Ans_Ast_Nodes, 1);
-
-		if (!ans_left)return NULL;
-		set_up_ast_node_op_datas(ans_left, E_Ans_Ast_Token_Type_Expr_Statement, NULL, 0);
-		return ans_left;
+		return build_ans_ast_null_expr_statement();
 	}
 	if ((ans_left = build_ans_ast_keyword(src_ans_token_list)))return ans_left;
-
+	if ((ans_left = build_ans_ast_toplevel_field(src_ans_token_list)))return ans_left;
 	ans_left = build_ans_ast_expr_comma(src_ans_token_list);
+	if (check_to_only_expr_keyword(ans_left))return ans_left;
 	return build_ans_ast_expr_statement(src_ans_token_list, ans_left);
 }
+Ans_Ast_Nodes* build_ans_ast_null_expr_statement() {
+	Ans_Ast_Nodes* ans_left;
 
+	ans_left = smart_calloc(Ans_Ast_Nodes, 1);
+
+	if (!ans_left)return NULL;
+	set_up_ast_node_op_datas(ans_left, E_Ans_Ast_Token_Type_Expr_Statement, NULL, 0);
+	return ans_left;
+}
 Ans_Ast_Nodes* build_ans_ast_keyword(Ans_Lex_Token_List* src_ans_token_list) {
 	if (ans_token_list_expect_token_str(src_ans_token_list, "obj")) {
 		return build_ans_ast_iden_decl(src_ans_token_list);
@@ -132,10 +158,61 @@ Ans_Ast_Nodes* build_ans_ast_keyword(Ans_Lex_Token_List* src_ans_token_list) {
 		return build_ans_ast_host_return(src_ans_token_list);
 	}
 	else if (ans_token_list_expect_token_str(src_ans_token_list, "cls")) {
+		return build_ans_ast_class(src_ans_token_list);
 	}
+
 	return NULL;
 }
+Ans_Ast_Nodes* build_ans_ast_toplevel_field(Ans_Lex_Token_List* src_ans_token_list) {
+	Ans_Ast_Nodes* field_node = NULL;
+	if (ans_token_list_expect_token_str(src_ans_token_list, "pbl")) {
+		if (ans_token_list_expect_token_str(src_ans_token_list, "{")) {
+			field_node = build_ans_ast_class_field(src_ans_token_list, E_Ans_Ast_Token_Type_Class_Field_Public, "error : expect to after public field");
+		}
+		else {
+			Ans_Ast_Nodes* tmp_field_node = build_ans_ast_class_field_decl(src_ans_token_list);
+			Ans_Ast_Nodes* field_node = set_up_ans_ast(NULL, NULL, E_Ans_Ast_Token_Type_Class_Field_Public, NULL, 0);
+			if (!field_node) return tmp_field_node;
+		}
+	}
+	else if (ans_token_list_expect_token_str(src_ans_token_list, "+{")) {
+		field_node = build_ans_ast_class_field(src_ans_token_list, E_Ans_Ast_Token_Type_Class_Field_Public, "error : expect to after public field");
+	}
+	else if (ans_token_list_expect_token_str(src_ans_token_list, "prv")) {
+		if (ans_token_list_expect_token_str(src_ans_token_list, "{")) {
+			field_node = build_ans_ast_class_field(src_ans_token_list, E_Ans_Ast_Token_Type_Class_Field_Private, "error : expect to after protected");
+		}
+		else {
+			Ans_Ast_Nodes* tmp_field_node = build_ans_ast_class_field_decl(src_ans_token_list);
+			Ans_Ast_Nodes* field_node = set_up_ans_ast(NULL, NULL, E_Ans_Ast_Token_Type_Class_Field_Private, NULL, 0);
+			if (!field_node) return tmp_field_node;
+		}
+	}
 
+	else if (ans_token_list_expect_token_str(src_ans_token_list, "-{")) {
+		field_node = build_ans_ast_class_field(src_ans_token_list, E_Ans_Ast_Token_Type_Class_Field_Private, "error : expect to after protected");
+	}
+	else if (ans_token_list_expect_token_str(src_ans_token_list, "prt")) {
+
+		if (ans_token_list_expect_token_str(src_ans_token_list, "{")) {
+			field_node = build_ans_ast_class_field(src_ans_token_list, E_Ans_Ast_Token_Type_Class_Field_Protected, "error : expect to after protected");
+		}
+		else {
+			Ans_Ast_Nodes* tmp_field_node = build_ans_ast_class_field_decl(src_ans_token_list);
+			Ans_Ast_Nodes* field_node = set_up_ans_ast(NULL, NULL, E_Ans_Ast_Token_Type_Class_Field_Protected, NULL, 0);
+			if (!field_node) return tmp_field_node;
+		}
+	}
+	else if (ans_token_list_expect_token_str(src_ans_token_list, "%{")) {
+		field_node = build_ans_ast_class_field(src_ans_token_list, E_Ans_Ast_Token_Type_Class_Field_Protected, "error : expect to after protected");
+	}
+	else return NULL;
+	Ans_Ast_Nodes* ans_right = set_up_ans_ast(NULL, field_node, E_Ans_Ast_Token_Type_Class_Field_None, NULL, 0);
+
+	Ans_Ast_Nodes* ans_left = set_up_ans_ast(ans_right, NULL, E_Ans_Ast_Token_Type_None_Value, "error : expect to class hash process", ext_strlen_add_null("error : expect to class hash process"));
+	if (!ans_left)return field_node;
+	return ans_left;
+}
 Ans_Ast_Nodes* build_ans_ast_block(Ans_Lex_Token_List* src_ans_token_list) {
 	if (ans_token_list_expect_token_str(src_ans_token_list, "{")) {
 		int end_check;
@@ -279,6 +356,128 @@ Ans_Ast_Nodes* build_ans_ast_args_decl(int* end_code, Ans_Lex_Token_List* src_an
 	} while (ans_token_list_expect_token_str(src_ans_token_list, ","));
 
 	return tmp_ans_args;
+}
+Ans_Ast_Nodes* build_ans_ast_class(Ans_Lex_Token_List* src_ans_token_list) {
+	Ans_Lex_Token* now_lex_token = peek_ans_lex_token(src_ans_token_list);
+	Ans_Ast_Nodes* ans_left = set_up_ans_ast(NULL, NULL, E_Ans_Ast_Token_Type_Class_Decl, NULL, 0);
+	const char* err_class_decl = "error : expect to iden after class decl.";
+	if (now_lex_token->ans_token_type == E_Ans_Lex_Token_Type_Iden) {
+		consume_ans_lex_token(src_ans_token_list);
+		set_up_ans_ast_data(ans_left, now_lex_token->ans_token_str, ext_strlen_add_null(now_lex_token->ans_token_str));
+		if (ans_token_list_expect_token_str(src_ans_token_list, "{")) {
+			ans_left->right = build_ans_ast_class_field(src_ans_token_list, E_Ans_Ast_Token_Type_Class_Field_Public, "error : expect to '}' after class fields");
+		}
+		else {
+			err_class_decl = "error : expect to '{' after class decl";
+			set_up_ast_node_op_datas(ans_left, E_Ans_Ast_Token_Type_None_Value, err_class_decl, ext_strlen_add_null(err_class_decl));
+
+		}
+	}
+	else {
+		set_up_ast_node_op_datas(ans_left, E_Ans_Ast_Token_Type_None_Value, err_class_decl, ext_strlen_add_null(err_class_decl));
+	}
+	return ans_left;
+}
+Ans_Ast_Nodes* build_ans_ast_class_field(Ans_Lex_Token_List* src_ans_token_list, Ans_Ast_Token_Type src_null_field_type, const char * src_class_field_err) {
+	int end_code = 0;
+	Ans_Ast_Nodes* public_field_node = NULL;
+	Ans_Ast_Nodes* tmp_public_field_node = NULL;
+	Ans_Ast_Nodes* private_field_node = NULL;
+	Ans_Ast_Nodes* tmp_private_field_node = NULL;
+	Ans_Ast_Nodes* protected_field_node = NULL;
+	Ans_Ast_Nodes* tmp_protected_field_node = NULL;
+	Ans_Field_Type_Cache* field_type_cache = NULL;
+	while ((end_code = end_code_ans_ast_block(src_ans_token_list)) != 0) {
+		if (end_code < 0) 	if (!field_type_cache)break; else { field_type_cache = delete_now_field_cache(field_type_cache); continue; }
+
+		if (ans_token_list_expect_token_str(src_ans_token_list, "pbl")) {
+			if (ans_token_list_expect_token_str(src_ans_token_list, "{")) {
+				field_type_cache = gen_and_chain_ans_field_cache(field_type_cache, E_Ans_Ast_Token_Type_Class_Field_Public);
+			}
+			else {
+				build_ans_ast_field_node(&tmp_public_field_node, &public_field_node, E_Ans_Ast_Token_Type_Class_Field_Public, src_ans_token_list);
+			}
+		}
+
+		else if (ans_token_list_expect_token_str(src_ans_token_list, "+{")) {
+			field_type_cache = gen_and_chain_ans_field_cache(field_type_cache, E_Ans_Ast_Token_Type_Class_Field_Public);
+		}
+		else if (ans_token_list_expect_token_str(src_ans_token_list, "prv")) {
+			if (ans_token_list_expect_token_str(src_ans_token_list, "{")) {
+				field_type_cache = gen_and_chain_ans_field_cache(field_type_cache, E_Ans_Ast_Token_Type_Class_Field_Private);
+
+			}
+			else {
+				build_ans_ast_field_node(&tmp_private_field_node, &private_field_node, E_Ans_Ast_Token_Type_Class_Field_Private, src_ans_token_list);
+			}
+		}
+		else if (ans_token_list_expect_token_str(src_ans_token_list, "-{")) {
+			field_type_cache = gen_and_chain_ans_field_cache(field_type_cache, E_Ans_Ast_Token_Type_Class_Field_Private);
+		}
+		else if (ans_token_list_expect_token_str(src_ans_token_list, "prt")) {
+			if (ans_token_list_expect_token_str(src_ans_token_list, "{")) {
+				field_type_cache = gen_and_chain_ans_field_cache(field_type_cache, E_Ans_Ast_Token_Type_Class_Field_Protected);
+
+			}
+			else {
+				build_ans_ast_field_node(&tmp_protected_field_node, &protected_field_node, E_Ans_Ast_Token_Type_Class_Field_Protected, src_ans_token_list);
+			}
+		}
+		else if (ans_token_list_expect_token_str(src_ans_token_list, "%{")) {
+			field_type_cache = gen_and_chain_ans_field_cache(field_type_cache, E_Ans_Ast_Token_Type_Class_Field_Protected);
+		}
+		else if (ans_token_list_expect_token_str(src_ans_token_list, "{")) {
+			field_type_cache = gen_and_chain_ans_field_cache(field_type_cache, E_Ans_Ast_Token_Type_Block);
+		}
+		else {
+			Ans_Ast_Token_Type field_type = get_field_cache_type(field_type_cache, src_null_field_type);
+			if (field_type == E_Ans_Ast_Token_Type_Class_Field_Public)
+				build_ans_ast_field_node(&tmp_public_field_node, &public_field_node, field_type, src_ans_token_list);
+			else if (field_type == E_Ans_Ast_Token_Type_Class_Field_Private)
+				build_ans_ast_field_node(&tmp_private_field_node, &private_field_node, field_type, src_ans_token_list);
+			else if (field_type == E_Ans_Ast_Token_Type_Class_Field_Protected)
+				build_ans_ast_field_node(&tmp_protected_field_node, &protected_field_node, field_type, src_ans_token_list);
+			else assert(false);
+		}
+	}
+
+	Ans_Ast_Nodes* final_field_node = NULL;
+	Ans_Ast_Nodes* tmp_final_node = NULL;
+	if (public_field_node) {
+		build_field_chain(&final_field_node, &tmp_final_node, public_field_node, tmp_public_field_node);
+	}
+
+	if (private_field_node) {
+		build_fields_chain(&final_field_node, &tmp_final_node, private_field_node, tmp_private_field_node);
+	}
+	if (protected_field_node) {
+		build_fields_chain(&final_field_node, &tmp_final_node, protected_field_node, tmp_protected_field_node);
+	}
+	if (end_code == 0) {
+		const char* decl_err = !field_type_cache
+			? src_class_field_err
+			: get_class_field_err_str(field_type_cache->field_type);
+		Ans_Ast_Nodes* err_class_node =
+			set_up_ans_ast(NULL, NULL, E_Ans_Ast_Token_Type_None_Value,
+				decl_err, ext_strlen_add_null(decl_err));
+		if (err_class_node) {
+			err_class_node->right = tmp_final_node;
+			tmp_final_node = err_class_node;
+		}
+	}
+	while (field_type_cache) field_type_cache = delete_now_field_cache(field_type_cache);
+	return tmp_final_node;
+}
+Ans_Ast_Nodes* build_ans_ast_class_field_decl(Ans_Lex_Token_List* src_ans_token_list) {
+	Ans_Ast_Nodes* field_node = NULL;
+	if (ans_token_list_expect_token_str(src_ans_token_list, "obj")) field_node = build_ans_ast_iden_decl(src_ans_token_list);
+	else if (ans_token_list_expect_token_str(src_ans_token_list, ";")) field_node = build_ans_ast_null_expr_statement();
+	else if (ans_token_list_expect_token_str(src_ans_token_list, "cls"))field_node = build_ans_ast_class(src_ans_token_list);
+	else {
+		consume_ans_lex_token(src_ans_token_list);
+		field_node = build_ans_ast_err_node(NULL, NULL, "error : expect to decl in filed node");
+	}
+	return field_node;
 }
 Ans_Ast_Nodes* build_ans_ast_host_return(Ans_Lex_Token_List* src_ans_token_list) {
 	Ans_Ast_Nodes* ans_left = set_up_ans_ast(NULL, NULL, E_Ans_Ast_Token_Type_Host_Return, NULL, 0);
@@ -440,7 +639,6 @@ Ans_Ast_Nodes* build_ans_ast_mul_div_mod(Ans_Lex_Token_List* src_ans_token_list)
 
 	return ans_left;
 }
-
 Ans_Ast_Nodes* build_ans_ast_sign_symbol(Ans_Lex_Token_List* src_ans_token_list) {
 	if (ans_token_list_expect_token_str(src_ans_token_list, "+")) {
 		Ans_Ast_Nodes* ans_right = build_ans_ast_sign_symbol(src_ans_token_list);
@@ -491,7 +689,7 @@ Ans_Ast_Nodes* build_ans_ast_back_ope(Ans_Lex_Token_List* src_ans_token_list) {
 Ans_Ast_Nodes* build_ans_ast_function_args(Ans_Lex_Token_List* src_ans_token_list) {
 	Ans_Ast_Nodes* ans_left = build_ans_ast_assigment(src_ans_token_list);
 	Ans_Ast_Nodes* ans_args = set_up_ans_ast(ans_left, NULL, E_Ans_Ast_Token_Type_Func_Args, NULL, 0);
-	if (!ans_args)return NULL;
+	if (!ans_args)return ans_args;
 
 	while (ans_token_list_expect_token_str(src_ans_token_list, ",")) {
 		Ans_Ast_Nodes* ans_right = smart_calloc(Ans_Ast_Nodes, 1);
@@ -505,7 +703,7 @@ Ans_Ast_Nodes* build_ans_ast_function_args(Ans_Lex_Token_List* src_ans_token_lis
 	return ans_args;
 }
 Ans_Ast_Nodes* build_ans_ast_function(Ans_Lex_Token_List* src_ans_token_list) {
-	Ans_Ast_Nodes* ans_left = build_ans_ast_pare(src_ans_token_list);
+	Ans_Ast_Nodes* ans_left = build_ans_ast_expr_keyword(src_ans_token_list);
 	while (ans_token_list_expect_token_str(src_ans_token_list, "(")) {
 		Ans_Ast_Nodes* ans_right = smart_calloc(Ans_Ast_Nodes, 1);
 		if (ans_right) {
@@ -526,7 +724,26 @@ Ans_Ast_Nodes* build_ans_ast_function(Ans_Lex_Token_List* src_ans_token_list) {
 	}
 	return ans_left;
 }
+
+Ans_Ast_Nodes* build_ans_ast_expr_keyword(Ans_Lex_Token_List* src_ans_token_list) {
+
+	if (ans_token_list_expect_token_data(src_ans_token_list, E_Ans_Lex_Token_Type_Keyword, "loop")) {
+		Ans_Ast_Nodes* ans_left = set_up_ans_ast(NULL, NULL, E_Ans_Ast_Token_Type_Loop, NULL, 0);
+		if (!ans_left)return ans_left;
+		if (ans_token_list_expect_token_data(src_ans_token_list, E_Ans_Lex_Token_Type_Punchcute, "{")) {
+			int end_check = 0;
+			Ans_Ast_Nodes* ans_right = build_ans_ast_block_process(&end_check, src_ans_token_list);
+			const char* loop_err_str = "error : expect to '}' after loop.";
+			if (end_check == 0)set_up_ans_ast_data(ans_left, loop_err_str, ext_strlen_add_null(loop_err_str));
+			ans_left->right = ans_right;
+			return ans_left;
+		}
+		return ans_left;
+	}
+	return build_ans_ast_pare(src_ans_token_list);
+}
 Ans_Ast_Nodes* build_ans_ast_pare(Ans_Lex_Token_List* src_ans_token_list) {
+
 	if (ans_token_list_expect_token_str(src_ans_token_list, "(")) {
 		Ans_Ast_Nodes* ans_left = smart_calloc(Ans_Ast_Nodes, 1);
 		if (!ans_left)return NULL;

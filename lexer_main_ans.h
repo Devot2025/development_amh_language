@@ -97,4 +97,5 @@ bool check_to_token_keyword(const char* src_token);
 Ans_Lex_Token_Type check_str_of_value(const char* src_str);
 Ans_Lex_Token_Type check_to_token_special_literal(const char* src_token);
 bool ans_token_list_expect_token_str(Ans_Lex_Token_List* src_token_list, const char* src_token_str);
+bool ans_token_list_expect_token_data(Ans_Lex_Token_List* src_token_list, Ans_Lex_Token_Type src_token_type, const char* src_tokem_str);
 #endif // !_LEXER_MAIN_ANS_H_
