@@ -40,7 +40,10 @@ typedef struct Ans_Class_Hash_Nodes {
 hash_process_ans_si_strap Ans_Hash_Process_List* gen_hash_process_list(const char* ans_file_name) {
 	if (!ans_file_name)return NULL;
 	const char* cache_ans_file_name = ans_file_name;
-	while (*ans_file_name && *ans_file_name != '.') ans_file_name++;
+	while (*ans_file_name && *ans_file_name != '.') {
+		if (*ans_file_name == '\\')cache_ans_file_name = ans_file_name;
+		ans_file_name++;
+	}
 	Ans_Hash_Process_List* new_hash_process_list = smart_calloc(Ans_Hash_Process_List, 1);
 	if (!new_hash_process_list)return new_hash_process_list;
 
