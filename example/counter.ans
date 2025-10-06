@@ -1,5 +1,5 @@
 #class
-@! This method currently has a bug.
+@! This method currently has a bug. (kept as a note)
 
 @ Public area
 pbl{
@@ -7,25 +7,33 @@ pbl{
 
     obj init(){
         count = 0;
+        @ low-level output only (no print)
+        ____virtual__write(stdout, "init done\n");
     }
 
     obj add(){
         count = count + 1;
+        @ low-level output only (no print)
+        ____virtual__write(stdout, "add: count = " + count + "\n");
     }
 
     obj reset(){
         count = 0;
+        @ low-level output only (no print)
+        ____virtual__write(stdout, "reset: count = 0\n");
     }
 
-    obj show(){
-        print("Count: " + count);
+    obj show_status(){
+        @ parsed former 'print("Count: " + count)' into direct virtual I/O
+        ____virtual__write(stdout, "count: " + count + "\n");
     }
 }
 
 @ +{} is the short form of public area
 +{
-    obj quickAdd(){
+    obj quick_add(){
         count = count + 10;
+        ____virtual__write(stdout, "quick_add: count = " + count + "\n");
     }
 }
 
@@ -33,14 +41,15 @@ pbl{
 prv{
     obj secret;
 
-    obj hideValue(obj v){
+    obj hide_value(v){
         secret = v;
+        @ no output here (private)
     }
 }
 
 @ -{} is the short form of private area
 -{
-    obj getHidden(){
+    obj get_hidden(){
         return secret;
     }
 }
@@ -51,17 +60,19 @@ prt{
 
     obj save(){
         backup = count;
+        ____virtual__write(stdout, "save: backup = " + backup + "\n");
     }
 
     obj restore(){
         count = backup;
+        ____virtual__write(stdout, "restore: count = " + count + "\n");
     }
 }
 
 @ %{} is the short form of protected area
 %{
-    obj protectTest(){
-        print("Protected function works.");
+    obj protect_test(){
+        ____virtual__write(stdout, "protected function works.\n");
     }
 }
 return 0;
