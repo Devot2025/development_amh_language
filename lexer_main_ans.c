@@ -65,7 +65,7 @@ Ans_Lex_Token_List* start_ans_lex_code(const char* src_ans_code) {
 	}
 
 	if (stack_token_word->str_index > 0) {
-		append_lex_token_to_token_list(dst_lex_token_list, stack_token_word, E_Ans_Lex_Token_Type_Error_);
+		append_lex_token_to_token_list(dst_lex_token_list, stack_token_word, E_Ans_Lex_Token_Type_NULL);
 	}
 
 	delete_str_buffer_array(&stack_token_word);

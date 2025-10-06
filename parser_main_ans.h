@@ -169,6 +169,8 @@ Ans_Ast_Nodes* build_ans_ast_abstract_node(Ans_Lex_Token_List* src_ans_token_lis
 Ans_Ast_Nodes* build_ans_ast_args_decl(int* end_code, Ans_Lex_Token_List* src_ans_token_list);
 Ans_Ast_Nodes* build_ans_ast_statement(Ans_Lex_Token_List* src_ans_token_list);
 Ans_Ast_Nodes* build_ans_ast_null_expr_statement();
+Ans_Ast_Nodes* build_ans_ast_expr_keyword(Ans_Lex_Token_List* src_ans_token_list);
+Ans_Ast_Nodes* build_ans_ast_keyword_expr_statement(Ans_Lex_Token_List* src_ans_token_list, Ans_Ast_Nodes* src_ans_node);
 Ans_Ast_Nodes* build_ans_ast_shift(Ans_Lex_Token_List* src);
 Ans_Ast_Nodes* build_ans_ast_keyword(Ans_Lex_Token_List* src_ans_token_list);
 Ans_Ast_Nodes* build_ans_ast_block(Ans_Lex_Token_List* src_ans_token_list);

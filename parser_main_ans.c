@@ -19,7 +19,7 @@ Ans_Field_Type_Cache* gen_and_chain_ans_field_cache(Ans_Field_Type_Cache * src_f
 
 bool check_to_only_expr_keyword(Ans_Ast_Nodes* src_ast_node) {
 	if (!src_ast_node)return false;
-	if (src_ast_node->token_type == E_Ans_Ast_Token_Type_Loop && src_ast_node->right)return true;
+	if (src_ast_node->token_type == E_Ans_Ast_Token_Type_Loop) return true;
 	return false;
 }
 void decision_final_accurate_binary_type(Ans_Ast_Nodes* src_ans_ast_node, const char* src_str) {
@@ -132,14 +132,20 @@ Ans_Ast_Nodes* build_ans_ast_abstract_node(Ans_Lex_Token_List* src_ans_token_lis
 Ans_Ast_Nodes* build_ans_ast_statement(Ans_Lex_Token_List* src_ans_token_list) {
 	Ans_Ast_Nodes* ans_left;
 	if ((ans_left = build_ans_ast_block(src_ans_token_list)))return ans_left;
-	if (ans_token_list_expect_token_str(src_ans_token_list, ";")) {
-		return build_ans_ast_null_expr_statement();
-	}
+	if (ans_token_list_expect_token_str(src_ans_token_list, ";")) return build_ans_ast_null_expr_statement();
 	if ((ans_left = build_ans_ast_keyword(src_ans_token_list)))return ans_left;
 	if ((ans_left = build_ans_ast_toplevel_field(src_ans_token_list)))return ans_left;
 	ans_left = build_ans_ast_expr_comma(src_ans_token_list);
-	if (check_to_only_expr_keyword(ans_left))return ans_left;
+	if (check_to_only_expr_keyword(ans_left)) return build_ans_ast_keyword_expr_statement(src_ans_token_list, ans_left);
 	return build_ans_ast_expr_statement(src_ans_token_list, ans_left);
+}
+Ans_Ast_Nodes* build_ans_ast_keyword_expr_statement(Ans_Lex_Token_List* src_ans_token_list, Ans_Ast_Nodes * src_ans_node) {
+	if (ans_token_list_expect_token_data(src_ans_token_list, E_Ans_Lex_Token_Type_Punchcute, ";")) {
+		Ans_Ast_Nodes* ans_left;
+		ans_left = set_up_ans_ast(src_ans_node, NULL, E_Ans_Ast_Token_Type_Expr_Statement, NULL, 0);
+		if (ans_left)src_ans_node = ans_left;
+	}
+	return src_ans_node;
 }
 Ans_Ast_Nodes* build_ans_ast_null_expr_statement() {
 	Ans_Ast_Nodes* ans_left;
@@ -761,7 +767,7 @@ Ans_Ast_Nodes* build_ans_ast_basic_token(Ans_Lex_Token_List* src_ans_token_list)
 	Ans_Ast_Nodes* ans_left = smart_calloc(Ans_Ast_Nodes, 1);
 	if (!ans_left)return NULL;
 	const char* error_str = "error : expect to operator.";
-
+	printf("%s", now_token_list->ans_token_str);
 	switch (now_token_list->ans_token_type) {
 	case E_Ans_Lex_Token_Type_Iden:
 		set_up_ast_node_op_datas(ans_left, E_Ans_Ast_Token_Type_Iden, now_token_list->ans_token_str, ext_strlen_add_null(now_token_list->ans_token_str));
