@@ -767,7 +767,6 @@ Ans_Ast_Nodes* build_ans_ast_basic_token(Ans_Lex_Token_List* src_ans_token_list)
 	Ans_Ast_Nodes* ans_left = smart_calloc(Ans_Ast_Nodes, 1);
 	if (!ans_left)return NULL;
 	const char* error_str = "error : expect to operator.";
-	printf("%s", now_token_list->ans_token_str);
 	switch (now_token_list->ans_token_type) {
 	case E_Ans_Lex_Token_Type_Iden:
 		set_up_ast_node_op_datas(ans_left, E_Ans_Ast_Token_Type_Iden, now_token_list->ans_token_str, ext_strlen_add_null(now_token_list->ans_token_str));
