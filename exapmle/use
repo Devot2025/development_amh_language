@@ -1,0 +1,16 @@
+#class
+pbl{
+obj id;
+}
+prv{
+obj name;
+obj height;
+obj weight;
+}
+prt{
+obj hoge(){
+   loop{
+
+   }
+}
+}
