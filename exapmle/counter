@@ -63,3 +63,4 @@ prt{
         print("Protected function works.");
     }
 }
+return 0;
