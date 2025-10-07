@@ -1,3 +1,4 @@
+which one do you think is better?
 now style
 cls A{
 	+{
@@ -14,7 +15,7 @@ cls A{
 	
 	}
 }
-another style
+another style(no nest and c++ style)
 cls A{
 	pbl>
 	+>
@@ -26,9 +27,12 @@ cls A{
 	prt>
 	%>
 
+　　constructer
+
 	ini>()
 	i = 1;
 	i = 2;
 	i = 3;
+
 
 }
