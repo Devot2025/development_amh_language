@@ -36,7 +36,7 @@ It currently performs **lexical analysis** and **AST construction**, but the ful
 int main(void) {
   Ans_Lex_Token_List* token_list = start_ans_lex_main("ans_file_path"); // 1
   ans_token_list_call(token_list);                                      // 2
-  Ans_Hash_Process_List* hash_list = gen_hash_process_list("std.ans");  // 3
+  Ans_Hash_Process_List* hash_list = gen_hash_process_list("ans_file_path");  // 3
   Ans_Ast_Nodes* ast_node = start_parser_ans_ast_main(token_list, hash_list); // 4
   start_hash_process_main(&ast_node, hash_list);                        // 5
   print_ast_ans_node(ast_node);                                         // 6
