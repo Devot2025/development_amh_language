@@ -1,0 +1,34 @@
+now style
+cls A{
+	+{
+	
+	
+	}
+	-{
+	
+	}
+	%{
+	
+	}
+	obj init(){
+	
+	}
+}
+another style
+cls A{
+	pbl>
+	+>
+	obj i;
+	
+	prv>
+	->
+	
+	prt>
+	%>
+
+	ini>()
+	i = 1;
+	i = 2;
+	i = 3;
+
+}
