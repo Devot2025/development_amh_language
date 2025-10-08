@@ -28,6 +28,12 @@ Ans_Lex_Token_List* start_ans_lex_code(const char* src_ans_code) {
 			ans_dot_token_process(stack_token_word, dst_lex_token_list, &now_lex_mode, tmp_now_ans_code);
 			continue;
 			break;
+		case E_Lex_Mode_S_Str:
+			ans_s_str_token_process(stack_token_word, dst_lex_token_list, &now_lex_mode, tmp_now_ans_code);
+			break;
+		case E_Lex_Mode_S_Str_Doll:
+			ans_s_str_doll_process(stack_token_word, dst_lex_token_list, &now_lex_mode, tmp_now_ans_code);
+			break;
 		case E_Lex_Mode_D_Str:
 			ans_d_str_token_process(stack_token_word, dst_lex_token_list, &now_lex_mode, tmp_now_ans_code);
 			break;
@@ -106,6 +112,10 @@ void ans_normal_token_process(Str_Buffer_Array* src_stack_token, Ans_Lex_Token_L
 	else if (now_byte_code == '.') {
 		*src_lex_mode = E_Lex_Mode_Dot;
 	}
+
+	else if (now_byte_code == '\'') {
+		*src_lex_mode = E_Lex_Mode_S_Str;
+	}
 	else if (now_byte_code == '`') {
 		append_lex_token_to_token_list(src_lex_token, src_stack_token, E_Ans_Lex_Token_Type_NULL);
 		append_str_buff(src_stack_token, now_byte_code);
@@ -171,6 +181,35 @@ void ans_dot_token_process(Str_Buffer_Array* src_stack_token, Ans_Lex_Token_List
 	*src_lex_mode = E_Lex_Mode_Normal;
 	/*now word is re run to next process.*/
 }
+
+void ans_s_str_token_process(Str_Buffer_Array* src_stack_token, Ans_Lex_Token_List* src_lex_token, Lex_Ans_Mode* src_lex_mode, const char now_byte_code) {
+	if (now_byte_code == '\'') {
+		if (src_stack_token->str_index == 0)append_str_buff(src_stack_token, '\0');
+		else if (src_stack_token->str_index == 1)
+			append_lex_token_to_token_list(src_lex_token, src_stack_token, E_Ans_Lex_Token_Type_Str_Literal);
+		else
+			append_lex_token_to_token_list(src_lex_token, src_stack_token, E_Ans_Lex_Token_Type_Error_Value);
+		*src_lex_mode = E_Lex_Mode_Normal;
+	}
+	else if (now_byte_code == '\n') {
+		append_lex_token_to_token_list(src_lex_token, src_stack_token, E_Ans_Lex_Token_Type_Error_Value);
+	}
+	else if (now_byte_code == '\\') {
+		*src_lex_mode = E_Lex_Mode_S_Str_Doll;
+	}
+	else append_str_buff(src_stack_token, now_byte_code);
+}
+void ans_s_str_doll_process(Str_Buffer_Array* src_stack_token, Ans_Lex_Token_List* src_lex_token, Lex_Ans_Mode* src_lex_mode, const char now_byte_code) {
+	if (now_byte_code == 'n') append_str_buff(src_stack_token, '\n');
+	else if (now_byte_code == 'b') append_str_buff(src_stack_token, '\b');
+	else if (now_byte_code == 'r') append_str_buff(src_stack_token, '\r');
+	else if (now_byte_code == 't') append_str_buff(src_stack_token, '\t');
+	else if (now_byte_code == '\\') append_str_buff(src_stack_token, '\\');
+	else if (now_byte_code == '"') append_str_buff(src_stack_token, '\"');
+	else append_str_buff(src_stack_token, now_byte_code);
+	*src_lex_mode = E_Lex_Mode_S_Str;
+}
+
 void ans_d_str_token_process(Str_Buffer_Array* src_stack_token, Ans_Lex_Token_List* src_lex_token, Lex_Ans_Mode* src_lex_mode, const char now_byte_code) {
 	if (now_byte_code == '\"') *src_lex_mode = E_Lex_Mode_D_Str_Next;
 	else if (now_byte_code == '\\') *src_lex_mode = E_Lex_Mode_D_Str_Doll;
@@ -310,7 +349,7 @@ Ans_Lex_Token_Type decision_token_type_standard(const char* src_token) {
 }
 bool check_to_token_keyword(const char* src_token) {
 	const char* keyword_token_list[] = {
-		"loop", "if", "else", "break_a", "break", "pbl", "prv", "prt","fld", "del","mod", "obj", "ext","cls",
+		"loop", "if", "else", "break_a", "break", "pbl", "prv", "prt","fld", "del","mod", "obj", "ext","cls","ins",
 		"int", "float", "double", "char", "string", "virtuals", "none", "array", "return", "albtype", "switch", NULL
 	};
 

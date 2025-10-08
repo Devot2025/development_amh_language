@@ -17,6 +17,7 @@ typedef enum Lex_Ans_Mode {
 	E_Lex_Mode_D_Str_Doll,
 	E_Lex_Mode_D_Str_Next,
 	E_Lex_Mode_S_Str,
+	E_Lex_Mode_S_Str_Doll,
 	E_Lex_Mode_Hash_Process,
 	E_Lex_Mode_Comment_Start,
 	E_Lex_Mode_Comment_Line,
@@ -32,6 +33,7 @@ To_Do_Macro_Func(E_Ans_Lex_Token_Type_Punchcute),\
 To_Do_Macro_Func(E_Ans_Lex_Token_Type_Operator),\
 To_Do_Macro_Func(E_Ans_Lex_Token_Type_Special_Literal),\
 To_Do_Macro_Func(E_Ans_Lex_Token_Type_Value_Literal),\
+To_Do_Macro_Func(E_Ans_Lex_Token_Type_Char_Literal),\
 To_Do_Macro_Func(E_Ans_Lex_Token_Type_Str_Literal),\
 To_Do_Macro_Func(E_Ans_Lex_Token_Type_Hash_Process),\
 To_Do_Macro_Func(E_Ans_Lex_Token_Type_Error_Value),\
@@ -53,7 +55,7 @@ ans_lex_si_strap void ans_token_list_call(Ans_Lex_Token_List* src_ans_token_list
 	const char* ans_lex_debug_string_token[] = {
 	Bulk_Gen_Ans_Lex_Token(CHANGE_TO_STR)
 	};
-
+	if (!src_ans_token_list)return;
 	if (!src_ans_token_list->stack_tokens)return;
 	for (src_ans_token_list->stack_token_list_index = 0; src_ans_token_list->stack_token_list_index < src_ans_token_list->stack_token_list_size; src_ans_token_list->stack_token_list_index++) {
 		assert((*(src_ans_token_list->stack_tokens + src_ans_token_list->stack_token_list_index)).ans_token_type <= GET_ARRAY_SIZE(ans_lex_debug_string_token));
@@ -81,6 +83,8 @@ void delete_ans_token_list(Ans_Lex_Token_List** src_ans_token_list);
 void ans_normal_token_process(Str_Buffer_Array* src_stack_token, Ans_Lex_Token_List* src_lex_token_list, Lex_Ans_Mode* src_lex_mode, const char now_byte_code);
 void ans_dot_token_process(Str_Buffer_Array* src_stack_token, Ans_Lex_Token_List* src_lex_token, Lex_Ans_Mode* src_lex_mode, const char now_byte_code);
 bool ans_operator_token_process(Str_Buffer_Array* src_stack_token, Ans_Lex_Token_List* src_lex_token, Lex_Ans_Mode* src_lex_mode, const char now_byte_code);
+void ans_s_str_token_process(Str_Buffer_Array* src_stack_token, Ans_Lex_Token_List* src_lex_token, Lex_Ans_Mode* src_lex_mode, const char now_byte_code);
+void ans_s_str_doll_process(Str_Buffer_Array* src_stack_token, Ans_Lex_Token_List* src_lex_token, Lex_Ans_Mode* src_lex_mode, const char now_byte_code);
 bool ans_d_str_next_process(Str_Buffer_Array* src_stack_token, Ans_Lex_Token_List* src_lex_token, Lex_Ans_Mode* src_lex_mode, const char now_byte_code);
 void ans_d_str_token_process(Str_Buffer_Array* src_stack_token, Ans_Lex_Token_List* src_lex_token, Lex_Ans_Mode* src_lex_mode, const char now_byte_code);
 void append_lex_token_to_token_list(Ans_Lex_Token_List* src_ans_token_list, Str_Buffer_Array* src_stack_token, Ans_Lex_Token_Type src_lex_token_type);

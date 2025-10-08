@@ -7,12 +7,19 @@
 #define ans_parser_si_strap static inline
 #define Bulk_Gen_Ans_Parser_Token(To_Do_Macro_Func)\
 To_Do_Macro_Func(E_Ans_Ast_Token_Type_Null),\
+To_Do_Macro_Func(E_Ans_Ast_Token_Type_Fld_Iden),\
 To_Do_Macro_Func(E_Ans_Ast_Token_Type_Block),\
 To_Do_Macro_Func(E_Ans_Ast_Token_Type_Host_Return),\
 To_Do_Macro_Func(E_Ans_Ast_Token_Type_Seq_Host_Break),\
 To_Do_Macro_Func(E_Ans_Ast_Token_Type_Seq_All_Host_Break),\
 To_Do_Macro_Func(E_Ans_Ast_Token_Type_Loop),\
+To_Do_Macro_Func(E_Ans_Ast_Token_Type_If),\
+To_Do_Macro_Func(E_Ans_Ast_Token_Type_Else_If),\
+To_Do_Macro_Func(E_Ans_Ast_Token_Type_Else),\
+To_Do_Macro_Func(E_Ans_Ast_Token_Type_If_Else_Chain),\
 To_Do_Macro_Func(E_Ans_Ast_Token_Type_Abstract_Host),\
+To_Do_Macro_Func(E_Ans_Ast_Token_Type_None_Host),\
+To_Do_Macro_Func(E_Ans_Ast_Token_Type_Seq_Abstract_Host),\
 To_Do_Macro_Func(E_Ans_Ast_Token_Type_Expr_Statement),\
 To_Do_Macro_Func(E_Ans_Ast_Token_Type_Expr_Pare),\
 To_Do_Macro_Func(E_Ans_Ast_Token_Type_Expr_Comma),\
@@ -25,6 +32,7 @@ To_Do_Macro_Func(E_Ans_Ast_Token_Type_Iden),\
 To_Do_Macro_Func(E_Ans_Ast_Token_Type_Var_Decl),\
 To_Do_Macro_Func(E_Ans_Ast_Token_Type_Func_Use),\
 To_Do_Macro_Func(E_Ans_Ast_Token_Type_Func_Decl),\
+To_Do_Macro_Func(E_Ans_Ast_Token_Type_Class_Instance),\
 To_Do_Macro_Func(E_Ans_Ast_Token_Type_Class_Decl),\
 To_Do_Macro_Func(E_Ans_Ast_Token_Type_Class_Field_None),\
 To_Do_Macro_Func(E_Ans_Ast_Token_Type_Class_Field_Public),\
@@ -158,7 +166,7 @@ void decision_final_accurate_binary_type(Ans_Ast_Nodes* src_ans_ast_node, const 
 void decision_final_accurate_specail_value(Ans_Ast_Nodes* src_node, const char* src_now_token_str);
 int end_code_ans_ast_block(Ans_Lex_Token_List* src_ans_token_list);
 bool check_to_only_expr_keyword(Ans_Ast_Nodes* src_ast_node);
-Ans_Ast_Token_Type get_match_ans_lex_ast_multi_type(const Ans_Ast_Token_Type* dst_token_type, const char** src_match_lex_str_list, Ans_Lex_Token_List* src_ans_token_list, uint32_t src_match_list_size);
+Ans_Ast_Token_Type get_match_ans_lex_ast_multi_type(const Ans_Ast_Token_Type* dst_token_type, const char** src_match_lex_str_list, Ans_Lex_Token_Type src_ast_lex_token_type, Ans_Lex_Token_List* src_ans_token_list, uint32_t src_match_list_size);
 Ans_Ast_Token_Type expect_add_sub_type(Ans_Lex_Token_List* src_ans_token_list);
 Ans_Ast_Token_Type expect_mul_div_mod_type(Ans_Lex_Token_List* src_ans_token_list);
 Ans_Ast_Token_Type expect_assigment_type(Ans_Lex_Token_List* src_ans_token_list);
@@ -174,13 +182,15 @@ Ans_Ast_Nodes* build_ans_ast_keyword_expr_statement(Ans_Lex_Token_List* src_ans_
 Ans_Ast_Nodes* build_ans_ast_shift(Ans_Lex_Token_List* src);
 Ans_Ast_Nodes* build_ans_ast_keyword(Ans_Lex_Token_List* src_ans_token_list);
 Ans_Ast_Nodes* build_ans_ast_block(Ans_Lex_Token_List* src_ans_token_list);
-Ans_Ast_Nodes* build_ans_ast_block_process(int* end_code, Ans_Lex_Token_List* src_ans_token_list);
+Ans_Ast_Nodes* build_ans_ast_block_process(int* end_code, Ans_Lex_Token_List* src_ans_token_list, Ans_Ast_Token_Type src_token_type);
+Ans_Ast_Nodes* build_ans_ast_if_else(Ans_Lex_Token_List* src_ans_token_list);
+Ans_Ast_Nodes* build_ans_ast_else_if(Ans_Ast_Nodes* src_ans_node, Ans_Lex_Token_List* src_ans_token_list);
 Ans_Ast_Nodes* build_ans_ast_class(Ans_Lex_Token_List* src_ans_token_list);
 Ans_Ast_Nodes* build_ans_ast_toplevel_field(Ans_Lex_Token_List* src_ans_token_list);
 Ans_Ast_Nodes* build_ans_ast_class_field(Ans_Lex_Token_List* src_ans_token_list, Ans_Ast_Token_Type src_null_field_type, const char* src_class_field_err);
 Ans_Ast_Nodes* build_ans_ast_iden_decl(Ans_Lex_Token_List* src_ans_token_list);
 Ans_Ast_Nodes* build_ans_ast_class_field_decl(Ans_Lex_Token_List* src_ans_token_list);
-Ans_Ast_Nodes* build_ans_ast_host_return(Ans_Lex_Token_List* src_ans_token_list);
+Ans_Ast_Nodes* build_ans_ast_host_return_and_breaks(Ans_Lex_Token_List* src_ans_token_list, Ans_Ast_Token_Type src_token_type);
 Ans_Ast_Nodes* build_ans_ast_expr_statement_err(Ans_Lex_Token_List* src_ans_token_list, Ans_Ast_Nodes* src_left);
 Ans_Ast_Nodes* build_ans_ast_expr_statement(Ans_Lex_Token_List* src_ans_token_list, Ans_Ast_Nodes * ans_left);
 Ans_Ast_Nodes* build_ans_ast_expr_comma(Ans_Lex_Token_List* src_ans_token_list);

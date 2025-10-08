@@ -4,9 +4,9 @@
 #define AST_ENUM_STR_OUT_POS 21
 extern const char* debug_ans_ast_token_str[] = { Bulk_Gen_Ans_Parser_Token(CHANGE_TO_STR) };
 
-#define ANS_AST_SPLIT_LR_TREE  "â”œâ”€â”€ "
-#define ANS_AST_SPLIT_ONLY_TREE "â””â”€â”€ "
-#define ANS_AST_ONLY_TREE     "â”‚   "
+#define ANS_AST_SPLIT_LR_TREE  "„¥„Ÿ„Ÿ "
+#define ANS_AST_SPLIT_ONLY_TREE "„¤„Ÿ„Ÿ "
+#define ANS_AST_ONLY_TREE     "„    "
 #define ANS_AST_END_TREE    "    "
 
 static void print_ast_tree_line(const Ans_Ast_Nodes* src_ans_node, const char* src_prefix, int last_check) {
@@ -18,12 +18,21 @@ static void print_ast_tree_line(const Ans_Ast_Nodes* src_ans_node, const char* s
 	if (src_ans_node->op) {
 		if (token_type == E_Ans_Ast_Token_Type_Iden || token_type == E_Ans_Ast_Token_Type_Var_Decl ||
 			token_type == E_Ans_Ast_Token_Type_Func_Decl || token_type == E_Ans_Ast_Token_Type_Func_Decl_Args ||
-			token_type == E_Ans_Ast_Token_Type_Class_Decl) {
+			token_type == E_Ans_Ast_Token_Type_Class_Decl || token_type == E_Ans_Ast_Token_Type_Class_Instance) {
 			printf("(\x1b[31m%s\x1b[0m)", (const char*)src_ans_node->op);
 		}
 		else if (token_type == E_Ans_Ast_Token_Type_String_Value) {
-			if (*(const char*)src_ans_node->op == '\n')printf("(\x1b[31m\"^\\n\"\x1b[0m)");
-			else printf("(\x1b[31m\"%s\"\x1b[0m)", (const char*)src_ans_node->op);
+			printf("(\x1b[31m\"");
+			for (const char* dup_cop = src_ans_node->op; *dup_cop; ++dup_cop) {
+				if (*dup_cop == '\n') {
+					putchar('^');
+					putchar('\\');
+					putchar('n');
+					continue;
+				}
+				putchar(*dup_cop);
+			}
+			printf("\"\x1b[0m)");
 		}
 		else if (token_type == E_Ans_Ast_Token_Type_Int_Value) {
 			printf("(\x1b[35mint:%d\x1b[0m)", *(const int*)src_ans_node->op);
@@ -48,7 +57,9 @@ static void print_ast_tree_line(const Ans_Ast_Nodes* src_ans_node, const char* s
 	char next_prefix[512];
 	snprintf(next_prefix, sizeof(next_prefix), "%s%s", src_prefix, last_check ? ANS_AST_END_TREE : ANS_AST_ONLY_TREE);
 
-	if (token_type == E_Ans_Ast_Token_Type_Abstract_Host) {
+	if (token_type == E_Ans_Ast_Token_Type_Abstract_Host || token_type == E_Ans_Ast_Token_Type_Seq_Abstract_Host || token_type == E_Ans_Ast_Token_Type_None_Host
+		|| token_type == E_Ans_Ast_Token_Type_If_Else_Chain
+		) {
 		int j = 0;
 		for (const Ans_Ast_Nodes* h = src_ans_node; h; h = h->left) j++;
 		int i = 0;
@@ -182,4 +193,3 @@ void normal_debug_ans_ast_print(Ans_Ast_Nodes* src_ans_ast_nodes, uint32_t src_i
 	normal_debug_ans_ast_print(src_ans_ast_nodes->right, src_idx + 1);
 }
 #endif // !_ANS_AST_DEBUG_PRINT_H_
-

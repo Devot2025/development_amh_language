@@ -126,7 +126,6 @@ Ans_Ast_Nodes* change_to_class_hash_process(Ans_Ast_Nodes* src_ast_node, const c
 
 	Ans_Ast_Nodes* final_field_node = NULL;
 	Ans_Ast_Nodes* tmp_final_node = NULL;
-	if (ans_class_hash_nodes.tmp_toplevel_statement_node)printf("debug out\n");
 	Ans_Ast_Nodes* toplevel_func_decl = set_up_ans_ast(NULL, ans_class_hash_nodes.tmp_toplevel_statement_node, E_Ans_Ast_Token_Type_Func_Decl, "mod", ext_strlen_add_null("mod"));
 	if (!toplevel_func_decl)return NULL;
 	/*mod filed decl*/
@@ -182,7 +181,7 @@ Ans_Ast_Nodes* get_to_block_node(Ans_Ast_Nodes* src_ans_node) {
 }
 void change_to_class_hash_process_block(Ans_Ast_Nodes* src_ast_node, Ans_Class_Hash_Nodes* src_ans_class_hash_node) {
 	Ans_Ast_Nodes* public_abs_ans_node = NULL;
-	if (src_ast_node->token_type == E_Ans_Ast_Token_Type_Abstract_Host) {
+	if (src_ast_node->token_type == E_Ans_Ast_Token_Type_Abstract_Host || src_ast_node->token_type == E_Ans_Ast_Token_Type_Seq_Abstract_Host || src_ast_node->token_type == E_Ans_Ast_Token_Type_None_Host) {
 		for (Ans_Ast_Nodes* abs_ans = src_ast_node; abs_ans; abs_ans = abs_ans->left) {
 			Ans_Ast_Nodes* ans_right;
 			if ((ans_right = get_to_none_value_of_class_field_node(abs_ans))) {
