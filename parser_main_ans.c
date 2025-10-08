@@ -282,30 +282,14 @@ Ans_Ast_Nodes* build_ans_ast_if_else(Ans_Lex_Token_List* src_ans_token_list) {
 				ans_right->right = ans_if_statement;
 				const char* if_err_str = "error : expect to '}' after if.";
 				if (end_code == 0)
-				set_up_ast_node_op_datas(ans_right, E_Ans_Ast_Token_Type_None_Value, if_err_str, ext_strlen_add_null(if_err_str));
+					set_up_ast_node_op_datas(ans_right, E_Ans_Ast_Token_Type_None_Value, if_err_str, ext_strlen_add_null(if_err_str));
 				else ans_right = build_ans_ast_else_if(ans_right, src_ans_token_list);
 			}
-			else if (ans_token_list_expect_token_data(src_ans_token_list, E_Ans_Lex_Token_Type_Punchcute, ";")) {
-				return ans_right;
-			}
-			else if (ans_token_list_expect_token_data(src_ans_token_list, E_Ans_Lex_Token_Type_Keyword, "break")) {
-				ans_right->right = build_ans_ast_host_return_and_breaks(src_ans_token_list, E_Ans_Ast_Token_Type_Seq_Host_Break);
-			}
-
-			else if (ans_token_list_expect_token_data(src_ans_token_list, E_Ans_Lex_Token_Type_Keyword, "break_a")) {
-				ans_right->right = build_ans_ast_host_return_and_breaks(src_ans_token_list, E_Ans_Ast_Token_Type_Seq_All_Host_Break);
-			}
-
-			else if (ans_token_list_expect_token_data(src_ans_token_list, E_Ans_Lex_Token_Type_Keyword, "return")) {
-				ans_right->right = build_ans_ast_host_return_and_breaks(src_ans_token_list, E_Ans_Ast_Token_Type_Host_Return);
-			}
 			else {
-				Ans_Ast_Nodes* ans_if_statement = build_ans_ast_expr_comma(src_ans_token_list);
-				if (check_to_only_expr_keyword(ans_if_statement)) {
-					ans_if_statement = build_ans_ast_keyword_expr_statement(src_ans_token_list, ans_if_statement);
-				}
-				else ans_if_statement = build_ans_ast_expr_statement(src_ans_token_list, ans_if_statement);
+				Ans_Ast_Nodes* ans_if_statement = build_ans_ast_statement(src_ans_token_list);
 				ans_right->right = ans_if_statement;
+				ans_right = build_ans_ast_else_if(ans_right, src_ans_token_list);
+
 				return ans_right;
 			}
 		}
@@ -339,33 +323,25 @@ Ans_Ast_Nodes* build_ans_ast_else_if(Ans_Ast_Nodes* src_ans_node, Ans_Lex_Token_
 			ans_else_if_chain->right = ans_left;
 			if (ans_token_list_expect_token_data(src_ans_token_list, E_Ans_Lex_Token_Type_Punchcute, "(")) {
 				ans_left->left = build_ans_ast_expr_comma(src_ans_token_list);
-				if (ans_token_list_expect_token_data(src_ans_token_list, E_Ans_Lex_Token_Type_Punchcute, "{")) {
-					int end_code = 0;
-					Ans_Ast_Nodes* ans_if_statement = build_ans_ast_block_process(&end_code, src_ans_token_list, E_Ans_Ast_Token_Type_None_Host);
-					ans_left->right = ans_if_statement;
-					const char* if_err_str = "error : expect to ')' after else if.";
-					if (end_code == 0)
-						set_up_ast_node_op_datas(ans_left, E_Ans_Ast_Token_Type_None_Value, if_err_str, ext_strlen_add_null(if_err_str));
-				}
+				if (ans_token_list_expect_token_data(src_ans_token_list, E_Ans_Lex_Token_Type_Punchcute, ")")) {
 
-				else if (ans_token_list_expect_token_data(src_ans_token_list, E_Ans_Lex_Token_Type_Keyword, "break")) {
-					ans_left->right = build_ans_ast_host_return_and_breaks(src_ans_token_list, E_Ans_Ast_Token_Type_Seq_Host_Break);
-				}
-
-				else if (ans_token_list_expect_token_data(src_ans_token_list, E_Ans_Lex_Token_Type_Keyword, "break_a")) {
-					ans_left->right = build_ans_ast_host_return_and_breaks(src_ans_token_list, E_Ans_Ast_Token_Type_Seq_All_Host_Break);
-				}
-
-				else if (ans_token_list_expect_token_data(src_ans_token_list, E_Ans_Lex_Token_Type_Keyword, "return")) {
-					ans_left->right = build_ans_ast_host_return_and_breaks(src_ans_token_list, E_Ans_Ast_Token_Type_Host_Return);
-				}
-				else if (!ans_token_list_expect_token_data(src_ans_token_list, E_Ans_Lex_Token_Type_Punchcute, ";")) {
-					Ans_Ast_Nodes* ans_if_statement = build_ans_ast_expr_comma(src_ans_token_list);
-					if (check_to_only_expr_keyword(ans_if_statement)) {
-						ans_if_statement = build_ans_ast_keyword_expr_statement(src_ans_token_list, ans_if_statement);
+					if (ans_token_list_expect_token_data(src_ans_token_list, E_Ans_Lex_Token_Type_Punchcute, "{")) {
+						int end_code = 0;
+						Ans_Ast_Nodes* ans_if_statement = build_ans_ast_block_process(&end_code, src_ans_token_list, E_Ans_Ast_Token_Type_None_Host);
+						ans_left->right = ans_if_statement;
+						const char* if_err_str = "error : expect to '}' after else if.";
+						if (end_code == 0)
+							set_up_ast_node_op_datas(ans_left, E_Ans_Ast_Token_Type_None_Value, if_err_str, ext_strlen_add_null(if_err_str));
 					}
-					else ans_if_statement = build_ans_ast_expr_statement(src_ans_token_list, ans_if_statement);
-					ans_left->right = ans_if_statement;
+					else{
+						Ans_Ast_Nodes* ans_if_statement = build_ans_ast_statement(src_ans_token_list);
+						ans_left->right = ans_if_statement;
+					}
+				}
+				else {
+					const char* err_else_if_str = "error : expect to ')' after else if.";
+					set_up_ast_node_op_datas(ans_left, E_Ans_Ast_Token_Type_None_Value, err_else_if_str, ext_strlen_add_null(err_else_if_str));
+
 				}
 
 			}
@@ -391,28 +367,12 @@ Ans_Ast_Nodes* build_ans_ast_else_if(Ans_Ast_Nodes* src_ans_node, Ans_Lex_Token_
 				int end_code = 0;
 				Ans_Ast_Nodes* ans_if_statement = build_ans_ast_block_process(&end_code, src_ans_token_list, E_Ans_Ast_Token_Type_None_Host);
 				ans_left->right = ans_if_statement;
-				const char* if_err_str = "error : expect to ')' after else if.";
+				const char* if_err_str = "error : expect to '}' after else if.";
 				if (end_code == 0)
 					set_up_ast_node_op_datas(ans_left, E_Ans_Ast_Token_Type_None_Value, if_err_str, ext_strlen_add_null(if_err_str));
 			}
-
-			else if (ans_token_list_expect_token_data(src_ans_token_list, E_Ans_Lex_Token_Type_Keyword, "break")) {
-				ans_left->right = build_ans_ast_host_return_and_breaks(src_ans_token_list, E_Ans_Ast_Token_Type_Seq_Host_Break);
-			}
-
-			else if (ans_token_list_expect_token_data(src_ans_token_list, E_Ans_Lex_Token_Type_Keyword, "break_a")) {
-				ans_left->right = build_ans_ast_host_return_and_breaks(src_ans_token_list, E_Ans_Ast_Token_Type_Seq_All_Host_Break);
-			}
-
-			else if (ans_token_list_expect_token_data(src_ans_token_list, E_Ans_Lex_Token_Type_Keyword, "return")) {
-				ans_left->right = build_ans_ast_host_return_and_breaks(src_ans_token_list, E_Ans_Ast_Token_Type_Host_Return);
-			}
-			else if (!ans_token_list_expect_token_data(src_ans_token_list, E_Ans_Lex_Token_Type_Punchcute, ";")) {
-				Ans_Ast_Nodes* ans_if_statement = build_ans_ast_expr_comma(src_ans_token_list);
-				if (check_to_only_expr_keyword(ans_if_statement)) {
-					ans_if_statement = build_ans_ast_keyword_expr_statement(src_ans_token_list, ans_if_statement);
-				}
-				else ans_if_statement = build_ans_ast_expr_statement(src_ans_token_list, ans_if_statement);
+			else {
+				Ans_Ast_Nodes* ans_if_statement = build_ans_ast_statement(src_ans_token_list);
 				ans_left->right = ans_if_statement;
 			}
 			ans_else_if_chain->right = ans_left;
