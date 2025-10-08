@@ -1,0 +1,22 @@
+#module
+
+obj func(){
+	cls hoge{
+		obj i;
+		obj k;
+		obj ini(){
+			i = k = 0;
+		}
+	}
+	res = *hoge;
+
+	res.k = loop{
+		if(res.i < 100) break res.i;
+		else res.i += 10;
+
+	} + 1000;
+
+	return ____virtual__write("k : " + res.k + "\n");
+}
+
+return func();
