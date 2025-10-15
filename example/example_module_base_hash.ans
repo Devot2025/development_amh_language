@@ -1,0 +1,6 @@
+#module_base
+obj i = 0 + 1;
+obj func(){
+
+}
+return 0;
