@@ -1,22 +1,7 @@
-#module
-
-obj func(){
-	cls hoge{
-		obj i;
-		obj k;
-		obj ini(){
-			i = k = 0;
-		}
-	}
-	res = *hoge;
-
-	res.k = loop{
-		if(res.i < 100) break res.i;
-		else res.i += 10;
-
-	} + 1000;
-
-	return ____virtual__write("k : " + res.k + "\n");
+obj circumference(obj r){
+    obj pi = 3.141512;
+    return pi * 2 * r;
 }
-
-return func();
+obj r = 10.0;
+obj res = circumference(r);
+return ____virtual__write(____get__virtual__stdout, "pi * 2 * r => " + res);

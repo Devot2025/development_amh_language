@@ -1,0 +1,28 @@
+#class
+pbl{
+    obj example_0(){
+        
+    }
+}
++{
+    obj example_1(){
+
+    }
+}
+prv{
+    obj example_2(){
+    }
+}
+-{
+    obj example_3(){
+
+    }
+}
+prt{
+    obj example_4(){
+    }
+}
+%{
+    obj example_5(){
+    }
+}

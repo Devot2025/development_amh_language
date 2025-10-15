@@ -60,7 +60,7 @@ ans_lex_si_strap void ans_token_list_call(Ans_Lex_Token_List* src_ans_token_list
 	if (!src_ans_token_list->stack_tokens)return;
 	for (src_ans_token_list->stack_token_list_index = 0; src_ans_token_list->stack_token_list_index < src_ans_token_list->stack_token_list_size; src_ans_token_list->stack_token_list_index++) {
 		assert((*(src_ans_token_list->stack_tokens + src_ans_token_list->stack_token_list_index)).ans_token_type <= GET_ARRAY_SIZE(ans_lex_debug_string_token));
-		printf("[idx %10lu|type %20s|token %10s]\n", src_ans_token_list->stack_token_list_index,
+		printf("[idx %10u|type %20s|token %10s]\n", src_ans_token_list->stack_token_list_index,
 			ans_lex_debug_string_token[(*(src_ans_token_list->stack_tokens + src_ans_token_list->stack_token_list_index)).ans_token_type] + ENUM_STR_OUT_POS,
 			(*(src_ans_token_list->stack_tokens + src_ans_token_list->stack_token_list_index)).ans_token_str);
 	}

@@ -1,7 +1,0 @@
-#module
-obj i = 1;
-obj j = 1;
-obj add(obj i, obj j){
-    return i + j;
-}
-return add(i, j);

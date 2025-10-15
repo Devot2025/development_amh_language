@@ -26,7 +26,7 @@ To_Do_Macro_Func(E_Abir_Instruction_A_Mul),\
 To_Do_Macro_Func(E_Abir_Instruction_A_Div),\
 To_Do_Macro_Func(E_Abir_Instruction_A_Mod),\
 To_Do_Macro_Func(E_Abir_Instruction_A_Logic_Not),\
-To_Do_Macro_Func(E_Abir_Instruction_A_A)\
+To_Do_Macro_Func(E_Abir_Instruction_A_A),\
 To_Do_Macro_Func(E_Abir_Instruction_Set),\
 To_Do_Macro_Func(E_Abir_Instruction_),\
 To_Do_Macro_Func(E_Abir_Instruction_A),\

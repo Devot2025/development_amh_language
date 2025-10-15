@@ -1,0 +1,9 @@
+#module
+obj u = 0;
+obj y;
+y = loop{
+
+    if(u > 100)break u;
+    else u += 10;
+};
+return y;
