@@ -9,7 +9,7 @@
 const char * dmp_ans_args(char ** src_args, int src_argc) {
 	if (src_argc > 1)
 		return *(src_args + src_argc - 1);
-	else return "test.ans";
+	else return "example/test.ans";
 }
 int main(int argc, char ** args) {
 	//printf("%s\n", smart_fsystem_gets(stdin));
@@ -32,4 +32,5 @@ int main(int argc, char ** args) {
 	delete_ans_ast_node(ast_node);
 	delete_hash_process_list(hash_list);
 	return 0;
+
 }
