@@ -85,11 +85,11 @@ bool gen_and_push_new_stack_memory(Ans_Stack_Memory** src_stack_memory, Ans_Valu
 void run_abir_const_push_stack_memory(Ans_Stack_Memory** ans_stack_memory, Ans_Bir_Chain* src_abir);
 Ans_Intermediate_Run_Host_Data* gen_ans_irh_data(Ans_Bir_Chain* src_abir_chain);
 void ans_get_virtual_stdout(Ans_Stack_Memory** src_stack_memory);
-Ans_Value_Memory* gen_new_virtual_memory(const void* src_virtual_memory);
-Ans_Value_Memory* gen_new_char_memory(const void* src_str_memory);
-Ans_Value_Memory* gen_new_int_memory(const void* src_int_memory);
-Ans_Value_Memory* gen_new_float_memory(const void* src_float_memory);
-Ans_Value_Memory* gen_new_double_memory(const void* src_double_memory);
-Ans_Value_Memory* gen_new_str_memory(const void* src_string_memory);
-Ans_Value_Memory* gen_new_u_binary(const void* src_u_bin_memory);
+Ans_Value_Memory* gen_new_virtual_memory(void* src_virtual_memory);
+Ans_Value_Memory* gen_new_char_memory(void* src_str_memory);
+Ans_Value_Memory* gen_new_int_memory(void* src_int_memory);
+Ans_Value_Memory* gen_new_float_memory(void* src_float_memory);
+Ans_Value_Memory* gen_new_double_memory(void* src_double_memory);
+Ans_Value_Memory* gen_new_str_memory(void* src_string_memory);
+Ans_Value_Memory* gen_new_u_binary(void* src_u_bin_memory);
 #endif // !_RUN_MAIN_ANS_H_

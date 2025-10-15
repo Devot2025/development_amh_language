@@ -6,6 +6,15 @@ void start_ini_run_program(Ans_Bir_Chain * src_abirs) {
 	ans_irh_data->symbol_datas = smart_calloc(Ans_Symbol_Table_Datas, 1);
 	main_run_abir_programs(ans_irh_data);
 }
+/**
+* $winホストを設定
+* winホストがスタート
+* TEST.ansをロード
+* ホストを設定する
+* TESTを実行する
+* 上のホストに返す
+* winの実行
+**/
 void main_run_abir_programs(Ans_Intermediate_Run_Host_Data* src_irh_data) {
 
 	while (src_irh_data->abir_chain) {
@@ -372,46 +381,46 @@ void run_abir_const_push_stack_memory(Ans_Stack_Memory ** ans_stack_memory, Ans_
 		gen_and_push_new_stack_memory(ans_stack_memory, str_value_memory, CONST_MEMORY);
 	}
 }
-Ans_Value_Memory* gen_new_virtual_memory(const void* src_str_virtual_memory) {
+Ans_Value_Memory* gen_new_virtual_memory(void* src_str_virtual_memory) {
 	Ans_Value_Memory* char_memory = smart_malloc(Ans_Value_Memory, 1);
 	if (!char_memory)return NULL;
 	char_memory->ans_data.mem_virtual = src_str_virtual_memory;
 	char_memory->ans_s_type = E_Ans_Standard_Virtual;
 	return char_memory;
 }
-Ans_Value_Memory* gen_new_char_memory(const void* src_str_memory) {
+Ans_Value_Memory* gen_new_char_memory(void* src_str_memory) {
 
 	Ans_Value_Memory* char_memory = smart_malloc(Ans_Value_Memory, 1);
 	if (!char_memory)return NULL;
-	char_memory->ans_data.mem_char = *(const char*)(char_memory);
+	char_memory->ans_data.mem_char = *(char*)(char_memory);
 	char_memory->ans_s_type = E_Ans_Standard_Char;
 	return char_memory;
 }
-Ans_Value_Memory* gen_new_int_memory(const void* src_int_memory) {
+Ans_Value_Memory* gen_new_int_memory(void* src_int_memory) {
 	Ans_Value_Memory* int_memory = smart_malloc(Ans_Value_Memory, 1);
 	if (!int_memory)return NULL;
-	int_memory->ans_data.mem_int = *(const int*)(src_int_memory);
+	int_memory->ans_data.mem_int = *(int*)(src_int_memory);
 	int_memory->ans_s_type = E_Ans_Standard_Int;
 	return int_memory;
 }
 
-Ans_Value_Memory* gen_new_float_memory(const void* src_float_memory) {
+Ans_Value_Memory* gen_new_float_memory(void* src_float_memory) {
 	Ans_Value_Memory* float_memory = smart_malloc(Ans_Value_Memory, 1);
 	if (!float_memory)return NULL;
-	float_memory->ans_data.mem_float = *(const float*)(src_float_memory);
+	float_memory->ans_data.mem_float = *(float*)(src_float_memory);
 	float_memory->ans_s_type = E_Ans_Standard_Float;
 	return float_memory;
 }
-Ans_Value_Memory* gen_new_double_memory(const void* src_double_memory) {
+Ans_Value_Memory* gen_new_double_memory(void* src_double_memory) {
 	Ans_Value_Memory* double_memory = smart_malloc(Ans_Value_Memory, 1);
 	if (!double_memory)return NULL;
-	double_memory->ans_data.mem_double = *(const double*)(src_double_memory);
+	double_memory->ans_data.mem_double = *(double*)(src_double_memory);
 	double_memory->ans_s_type = E_Ans_Standard_Double;
 	return double_memory;
 }
 
 
-Ans_Value_Memory* gen_new_str_memory(const void* src_string_memory) {
+Ans_Value_Memory* gen_new_str_memory(void* src_string_memory) {
 
 	Ans_Value_Memory* str_memory = smart_malloc(Ans_Value_Memory, 1);
 	if (!str_memory)return NULL;
@@ -420,7 +429,7 @@ Ans_Value_Memory* gen_new_str_memory(const void* src_string_memory) {
 	return str_memory;
 }
 
-Ans_Value_Memory* gen_new_u_binary(const void* src_u_bin_memory) {
+Ans_Value_Memory* gen_new_u_binary(void* src_u_bin_memory) {
 
 	Ans_Value_Memory* u_bin_memory = smart_malloc(Ans_Value_Memory, 1);
 	if (!u_bin_memory)return NULL;

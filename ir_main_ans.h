@@ -68,7 +68,7 @@ typedef struct Ans_Bir_Chain {
 	Abir_Data a_data;
 	struct Ans_Bir_Chain* next_bir;
 }Ans_Bir_Chain;
-ans_ir_si_strap Ans_Bir_Chain* gen_abir_chain(Ans_Bir_Chain* now_abir, Ans_Abir_Instruction src_abir_instruction, void* src_data, size_t src_data_size, Abir_Const_Data_Type src_c_data_type) {
+ans_ir_si_strap Ans_Bir_Chain* gen_abir_chain(Ans_Bir_Chain* now_abir, Ans_Abir_Instruction src_abir_instruction, const void* src_data, size_t src_data_size, Abir_Const_Data_Type src_c_data_type) {
 	Ans_Bir_Chain* dst_abir_chain = smart_calloc(Ans_Bir_Chain, 1);
 	if (!dst_abir_chain)return now_abir;
 	dst_abir_chain->a_data.abir_cdata_type = src_c_data_type;
@@ -114,8 +114,8 @@ ans_ir_si_strap void print_debug_abir_instructions(Ans_Bir_Chain* src_ans_chain)
 
 		const char* out_str = (const char*)src_ans_chain->a_data.v_data;
 
-		uint32_t str_size = ext_strlen_add_null(out_str);
-		uint32_t tmp_str_size = str_size + 3;
+		size_t str_size = ext_strlen_add_null(out_str);
+		size_t tmp_str_size = str_size + 3;
 
 		char* final_out_str = smart_malloc(char, tmp_str_size);
 		if (final_out_str) {

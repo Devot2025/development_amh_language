@@ -37,6 +37,7 @@ To_Do_Macro_Func(E_Ans_Lex_Token_Type_Value_Literal),\
 To_Do_Macro_Func(E_Ans_Lex_Token_Type_Char_Literal),\
 To_Do_Macro_Func(E_Ans_Lex_Token_Type_Str_Literal),\
 To_Do_Macro_Func(E_Ans_Lex_Token_Type_Hash_Process),\
+To_Do_Macro_Func(E_Ans_Lex_Token_Type_Hash_Process_End),\
 To_Do_Macro_Func(E_Ans_Lex_Token_Type_Error_Value),\
 To_Do_Macro_Func(E_Ans_Lex_Token_Type_Error_),
 
