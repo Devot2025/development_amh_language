@@ -72,6 +72,7 @@ Ans_Ast_Nodes* build_ans_ast_block(Ans_Lex_Token_List* src_ans_token_list);
 Ans_Ast_Nodes* get_to_none_value_of_class_field_node(Ans_Ast_Nodes* src_ans_node);
 Ans_Ast_Nodes* get_to_block_node(Ans_Ast_Nodes* src_ans_node);
 void change_to_class_hash_process_block(Ans_Ast_Nodes* src_ast_node, Ans_Class_Hash_Nodes* src_ans_class_hash_node);
+Ans_Ast_Nodes* change_to_module_base_hash_process(Ans_Ast_Nodes* src_ast_node, const char* module_base_name);
 Ans_Ast_Nodes* change_to_module_hash_process(Ans_Ast_Nodes* src_ast_node, const char* module_name);
 Ans_Ast_Nodes* change_to_module_hash_process_helper(Ans_Ast_Nodes* src_ast_node);
 #endif // !_HASH_PROCESS_ANS_MAIN_H_

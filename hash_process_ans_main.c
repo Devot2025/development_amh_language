@@ -18,8 +18,9 @@ bool standard_hash_process_ans(Ans_Hash_Process_List* src_hash_process_list, Ans
 		else if (ans_token_list_expect_token_str(src_token_list, "extend")) {
 
 		}
-		else if (ans_token_list_expect_token_str(src_token_list, "base")) {
-
+		else if (ans_token_list_expect_token_str(src_token_list, "module_base")) {
+			if (src_hash_process_list->file_modularization_process & HASH_PROCESS_STANDARD_ID)src_hash_process_list->file_modularization_process = HASH_PROCESS_MODULE_BASE_ID;
+			return false;
 		}
 		else consume_ans_lex_token(src_token_list);/*not found hash process cosume*/
 		return false;
@@ -34,6 +35,11 @@ void start_hash_process_main(Ans_Ast_Nodes** src_ast_node, Ans_Hash_Process_List
 	else if (src_hash_process_list->file_modularization_process & HASH_PROCESS_CLASS_ID) {
 		Ans_Ast_Nodes* tmp_result_module = change_to_class_hash_process(*src_ast_node, src_hash_process_list->abstract_host_name);
 		if (tmp_result_module)*src_ast_node = tmp_result_module;
+	}
+
+	else if (src_hash_process_list->file_modularization_process & HASH_PROCESS_MODULE_BASE_ID) {
+		Ans_Ast_Nodes* tmp_result_module = change_to_module_base_hash_process(*src_ast_node, src_hash_process_list->abstract_host_name);
+		*src_ast_node = tmp_result_module;
 	}
 }
 
@@ -263,6 +269,81 @@ void change_to_class_hash_process_block(Ans_Ast_Nodes* src_ast_node, Ans_Class_H
 			}
 		}
 	}
+}
+Ans_Ast_Nodes* change_to_module_base_hash_process(Ans_Ast_Nodes* src_ast_node, const char* module_base_name) {
+
+	if (!src_ast_node)return NULL;
+	Ans_Ast_Nodes* toplevel_decl_node = NULL;
+	Ans_Ast_Nodes* tmp_toplevel_decl_node = NULL;
+	Ans_Ast_Nodes* toplevel_statement_node = NULL;
+	Ans_Ast_Nodes* tmp_toplevel_statement_node = NULL;
+	if (src_ast_node->token_type == E_Ans_Ast_Token_Type_Abstract_Host) {
+		for (Ans_Ast_Nodes* abs_ans = src_ast_node; abs_ans; abs_ans = abs_ans->left) {
+			Ans_Ast_Nodes* decl_node = change_to_module_hash_process_helper(abs_ans->right);
+			if (decl_node) {
+				/*decl all public*/
+				if (decl_node->token_type == E_Ans_Ast_Token_Type_Var_Decl) {
+					decl_node->token_type = E_Ans_Ast_Token_Type_Iden;
+					Ans_Ast_Nodes* new_decl_node = set_up_ans_ast(NULL, NULL, E_Ans_Ast_Token_Type_Var_Decl, decl_node->op, ext_strlen_add_null(decl_node->op));
+					if (!new_decl_node)break;
+					Ans_Ast_Nodes* new_decl_expr_node = set_up_ans_ast(new_decl_node, NULL, E_Ans_Ast_Token_Type_Expr_Statement, decl_node->op, ext_strlen_add_null(decl_node->op));
+					if (!new_decl_expr_node) {
+						delete_ans_ast_node(new_decl_node);
+						break;
+					}
+					Ans_Ast_Nodes* new_ah_decl_node = set_up_ans_ast(NULL, new_decl_expr_node, E_Ans_Ast_Token_Type_Abstract_Host, decl_node->op, ext_strlen_add_null(decl_node->op));
+					if (!new_ah_decl_node) {
+						delete_ans_ast_node(new_decl_expr_node);
+						break;
+					}
+
+					if (!toplevel_statement_node)toplevel_statement_node = tmp_toplevel_statement_node = abs_ans;
+					else {
+						toplevel_statement_node->left = abs_ans;
+						toplevel_statement_node = abs_ans;
+					}
+
+					if (!toplevel_decl_node)tmp_toplevel_decl_node = toplevel_decl_node = new_ah_decl_node;
+					else {
+						toplevel_decl_node->left = new_ah_decl_node;
+						toplevel_decl_node = new_ah_decl_node;
+					}
+				}
+				else {
+
+					if (!toplevel_decl_node)tmp_toplevel_decl_node = toplevel_decl_node = abs_ans;
+					else {
+						toplevel_decl_node->left = abs_ans;
+						toplevel_decl_node = abs_ans;
+					}
+				}
+			}
+			else {
+				if (!toplevel_statement_node)toplevel_statement_node = tmp_toplevel_statement_node = abs_ans;
+				else {
+					toplevel_statement_node->left = abs_ans;
+					toplevel_statement_node = abs_ans;
+				}
+			}
+		}
+	}
+
+	if (toplevel_decl_node && toplevel_decl_node->left)toplevel_decl_node->left = NULL;
+	if (toplevel_statement_node && toplevel_statement_node->left) toplevel_statement_node->left = NULL;
+	/*toplevel function*/
+	Ans_Ast_Nodes* toplevel_func_decl = set_up_ans_ast(NULL, tmp_toplevel_statement_node, E_Ans_Ast_Token_Type_Func_Decl, module_base_name, ext_strlen_add_null(module_base_name));
+	if (!toplevel_func_decl) {
+		delete_ans_ast_node(tmp_toplevel_decl_node);
+		delete_ans_ast_node(tmp_toplevel_statement_node);
+		return NULL;
+	}
+	/*mod filed decl*/
+	Ans_Ast_Nodes* decision_module_absract_node = set_up_ans_ast(tmp_toplevel_decl_node, toplevel_func_decl, E_Ans_Ast_Token_Type_Abstract_Host, NULL, 0);
+	if (!decision_module_absract_node) {
+
+		delete_ans_ast_node(toplevel_func_decl);
+	}
+	return decision_module_absract_node;
 }
 Ans_Ast_Nodes* change_to_module_hash_process(Ans_Ast_Nodes* src_ast_node, const char* module_name) {
 	if (!src_ast_node)return NULL;
