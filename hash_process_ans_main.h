@@ -44,12 +44,13 @@ hash_process_ans_si_strap Ans_Hash_Process_List* gen_hash_process_list(const cha
 		if (*ans_file_name == '\\' || *ans_file_name == '/')cache_ans_file_name = ans_file_name + 1;
 		ans_file_name++;
 	}
+	size_t abstract_name_len = (size_t)(ans_file_name - cache_ans_file_name);
+	if (abstract_name_len == 0)return NULL;
 	Ans_Hash_Process_List* new_hash_process_list = smart_calloc(Ans_Hash_Process_List, 1);
 	if (!new_hash_process_list)return new_hash_process_list;
 
 	new_hash_process_list->file_depency_process = HASH_PROCESS_STANDARD_ID;
 	new_hash_process_list->file_modularization_process = HASH_PROCESS_STANDARD_ID;
-	size_t abstract_name_len = (size_t)(ans_file_name - cache_ans_file_name);
 	new_hash_process_list->abstract_host_name = smart_calloc(char, abstract_name_len + 1);
 	if (!new_hash_process_list->abstract_host_name) {
 		free(new_hash_process_list);

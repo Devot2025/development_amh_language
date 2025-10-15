@@ -160,6 +160,9 @@ ans_parser_si_strap Ans_Ast_Token_Type get_field_cache_type(Ans_Field_Type_Cache
 ans_parser_si_strap Ans_Ast_Nodes* build_ans_ast_err_node(Ans_Ast_Nodes* src_left, Ans_Ast_Nodes* src_right, const char* err_node_str) {
 	return set_up_ans_ast(src_left, src_right, E_Ans_Ast_Token_Type_None_Value, err_node_str, ext_strlen_add_null(err_node_str));
 }
+ans_parser_si_strap void* get_ans_ast_nodes_op(Ans_Ast_Nodes* src_ans_node) {
+	return src_ans_node ? src_ans_node->op : NULL;
+}
 void build_ans_ast_field_node(Ans_Ast_Nodes** src_tmp_field_node, Ans_Ast_Nodes** src_field_node, Ans_Ast_Token_Type src_field_type, Ans_Lex_Token_List* src_ans_token_list);
 Ans_Field_Type_Cache* gen_and_chain_ans_field_cache(Ans_Field_Type_Cache* src_field_cache, Ans_Ast_Token_Type src_field_type);
 void decision_final_accurate_binary_type(Ans_Ast_Nodes* src_ans_ast_node, const char* src_str);

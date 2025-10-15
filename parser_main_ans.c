@@ -225,9 +225,8 @@ Ans_Ast_Nodes* build_ans_ast_toplevel_field(Ans_Lex_Token_List* src_ans_token_li
 		field_node = build_ans_ast_class_field(src_ans_token_list, E_Ans_Ast_Token_Type_Class_Field_Protected, "error : expect to after protected");
 	}
 	else return NULL;
-	Ans_Ast_Nodes* ans_right = set_up_ans_ast(NULL, field_node, E_Ans_Ast_Token_Type_Class_Field_None, NULL, 0);
 
-	Ans_Ast_Nodes* ans_left = set_up_ans_ast(ans_right, NULL, E_Ans_Ast_Token_Type_None_Value, "error : expect to class hash process", ext_strlen_add_null("error : expect to class hash process"));
+	Ans_Ast_Nodes* ans_left = set_up_ans_ast(NULL, field_node, E_Ans_Ast_Token_Type_None_Value, "error : expect to class hash process", ext_strlen_add_null("error : expect to class hash process"));
 	if (!ans_left)return field_node;
 	return ans_left;
 }
@@ -434,6 +433,9 @@ Ans_Ast_Nodes* build_ans_ast_iden_decl(Ans_Lex_Token_List* src_ans_token_list) {
 				decl_err = "error : expect to '}' after func def";
 				Ans_Ast_Nodes* block_node = build_ans_ast_block_process(&end_code, src_ans_token_list, E_Ans_Ast_Token_Type_Abstract_Host);
 				if (end_code == 0) set_up_ast_node_op_datas(ans_left, E_Ans_Ast_Token_Type_None_Value, decl_err, ext_strlen_add_null(decl_err));
+				if(!block_node) {
+					block_node = set_up_ans_ast(NULL, NULL, E_Ans_Ast_Token_Type_Abstract_Host, NULL, 0);
+				}
 				ans_left->right = block_node;
 			}
 			else set_up_ast_node_op_datas(ans_left, E_Ans_Ast_Token_Type_None_Value, decl_err, ext_strlen_add_null(decl_err));
@@ -497,8 +499,9 @@ Ans_Ast_Nodes* build_ans_ast_class(Ans_Lex_Token_List* src_ans_token_list) {
 	Ans_Ast_Nodes* ans_left = set_up_ans_ast(NULL, NULL, E_Ans_Ast_Token_Type_Class_Decl, NULL, 0);
 	const char* err_class_decl = "error : expect to iden after class decl.";
 	if (now_lex_token->ans_token_type == E_Ans_Lex_Token_Type_Iden) {
-		consume_ans_lex_token(src_ans_token_list);
 		set_up_ans_ast_data(ans_left, now_lex_token->ans_token_str, ext_strlen_add_null(now_lex_token->ans_token_str));
+		consume_ans_lex_token(src_ans_token_list);
+
 		if (ans_token_list_expect_token_data(src_ans_token_list, E_Ans_Lex_Token_Type_Punchcute,"{")) {
 			ans_left->right = build_ans_ast_class_field(src_ans_token_list, E_Ans_Ast_Token_Type_Class_Field_Public, "error : expect to '}' after class fields");
 		}
@@ -663,6 +666,7 @@ Ans_Ast_Nodes* build_ans_ast_assigment(Ans_Lex_Token_List* src_ans_token_list) {
 		Ans_Ast_Nodes* ans_right = smart_calloc(Ans_Ast_Nodes, 1);
 		if (!ans_right)break;
 		ans_right->left = ans_left;
+
 		set_up_ast_node_op_datas(ans_right, tmp_type, NULL, 0);
 		ans_right->right = build_ans_ast_assigment(src_ans_token_list);
 		ans_left = ans_right;
@@ -851,7 +855,7 @@ Ans_Ast_Nodes* build_ans_ast_back_ope(Ans_Lex_Token_List* src_ans_token_list) {
 }
 Ans_Ast_Nodes* build_ans_ast_function_args(Ans_Lex_Token_List* src_ans_token_list) {
 	Ans_Ast_Nodes* ans_left = build_ans_ast_assigment(src_ans_token_list);
-	Ans_Ast_Nodes* ans_args = set_up_ans_ast(ans_left, NULL, E_Ans_Ast_Token_Type_Func_Args, NULL, 0);
+	Ans_Ast_Nodes* ans_args = set_up_ans_ast(NULL, ans_left, E_Ans_Ast_Token_Type_Func_Args, NULL, 0);
 	if (!ans_args)return ans_args;
 
 	while (ans_token_list_expect_token_data(src_ans_token_list, E_Ans_Lex_Token_Type_Operator,",")) {
@@ -911,7 +915,7 @@ Ans_Ast_Nodes* build_ans_ast_pare(Ans_Lex_Token_List* src_ans_token_list) {
 		Ans_Ast_Nodes* ans_left = smart_calloc(Ans_Ast_Nodes, 1);
 		if (!ans_left)return NULL;
 		ans_left->right = build_ans_ast_expr_comma(src_ans_token_list);
-		if (ans_token_list_expect_token_data(src_ans_token_list, E_Ans_Lex_Token_Type_Punchcute,")")) set_up_ast_node_op_datas(ans_left, E_Ans_Ast_Token_Type_Expr_Comma, NULL, 0);
+		if (ans_token_list_expect_token_data(src_ans_token_list, E_Ans_Lex_Token_Type_Punchcute,")")) set_up_ast_node_op_datas(ans_left, E_Ans_Ast_Token_Type_Expr_Pare, NULL, 0);
 		else set_up_ast_node_op_datas(ans_left, E_Ans_Ast_Token_Type_None_Value, "error : expect to ')'", ext_strlen_add_null("error : expect to ')'"));
 		return ans_left;
 	}
