@@ -13,6 +13,7 @@ typedef enum Lex_Ans_Mode {
 	E_Lex_Mode_Normal,
 	E_Lex_Mode_Operator,
 	E_Lex_Mode_Dot,
+	E_Lex_Mode_Three_Dot,
 	E_Lex_Mode_D_Str,
 	E_Lex_Mode_D_Str_Doll,
 	E_Lex_Mode_D_Str_Next,
@@ -81,7 +82,8 @@ Ans_Lex_Token_List* start_ans_lex_main(const char* ans_file_path);
 Ans_Lex_Token_List* start_ans_lex_code(const char* src_ans_code);
 void delete_ans_token_list(Ans_Lex_Token_List** src_ans_token_list);
 void ans_normal_token_process(Str_Buffer_Array* src_stack_token, Ans_Lex_Token_List* src_lex_token_list, Lex_Ans_Mode* src_lex_mode, const char now_byte_code);
-void ans_dot_token_process(Str_Buffer_Array* src_stack_token, Ans_Lex_Token_List* src_lex_token, Lex_Ans_Mode* src_lex_mode, const char now_byte_code);
+bool ans_three_dot_token_process(Str_Buffer_Array* src_stack_token, Ans_Lex_Token_List* src_lex_token, Lex_Ans_Mode* src_lex_mode, const char now_byte_code);
+bool ans_dot_token_process(Str_Buffer_Array* src_stack_token, Ans_Lex_Token_List* src_lex_token, Lex_Ans_Mode* src_lex_mode, const char now_byte_code);
 bool ans_operator_token_process(Str_Buffer_Array* src_stack_token, Ans_Lex_Token_List* src_lex_token, Lex_Ans_Mode* src_lex_mode, const char now_byte_code);
 void ans_s_str_token_process(Str_Buffer_Array* src_stack_token, Ans_Lex_Token_List* src_lex_token, Lex_Ans_Mode* src_lex_mode, const char now_byte_code);
 void ans_s_str_doll_process(Str_Buffer_Array* src_stack_token, Ans_Lex_Token_List* src_lex_token, Lex_Ans_Mode* src_lex_mode, const char now_byte_code);

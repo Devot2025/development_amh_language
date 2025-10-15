@@ -1,12 +1,22 @@
 #include "run_main_ans.h"
+
 void start_ini_run_program(Ans_Bir_Chain * src_abirs) {
 	if (!src_abirs)return;
 	Ans_Intermediate_Run_Host_Data* ans_irh_data = gen_ans_irh_data(src_abirs);
 	ans_irh_data->symbol_datas = smart_calloc(Ans_Symbol_Table_Datas, 1);
 	main_run_abir_programs(ans_irh_data);
 }
-
+/**
+* $winホストを設定
+* winホストがスタート
+* TEST.ansをロード
+* ホストを設定する
+* TESTを実行する
+* 上のホストに返す
+* winの実行
+**/
 void main_run_abir_programs(Ans_Intermediate_Run_Host_Data* src_irh_data) {
+
 	while (src_irh_data->abir_chain) {
 		run_abir_program_process_task(src_irh_data);
 		src_irh_data->abir_chain = src_irh_data->abir_chain->next_bir;

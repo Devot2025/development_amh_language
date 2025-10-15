@@ -131,6 +131,7 @@ Ans_Ast_Nodes* change_to_class_hash_process(Ans_Ast_Nodes* src_ast_node, const c
 			else {
 				Ans_Ast_Nodes* new_right = set_up_ans_ast(NULL, abs_ans->right, E_Ans_Ast_Token_Type_Abstract_Host, NULL, 0);
 				if (!new_right)break;
+
 				if (!ans_class_hash_nodes.toplevel_statement_node)ans_class_hash_nodes.toplevel_statement_node = ans_class_hash_nodes.tmp_toplevel_statement_node = new_right;
 				else {
 					ans_class_hash_nodes.toplevel_statement_node->left = new_right;
@@ -147,6 +148,7 @@ Ans_Ast_Nodes* change_to_class_hash_process(Ans_Ast_Nodes* src_ast_node, const c
 	Ans_Ast_Nodes* final_field_node = NULL;
 	Ans_Ast_Nodes* tmp_final_node = NULL;
 	Ans_Ast_Nodes* toplevel_func_decl = set_up_ans_ast(NULL, ans_class_hash_nodes.tmp_toplevel_statement_node, E_Ans_Ast_Token_Type_Func_Decl, "mod", ext_strlen_add_null("mod"));
+	
 	if (!toplevel_func_decl) {
 		delete_ans_ast_node(ans_class_hash_nodes.tmp_private_decl_node);
 		delete_ans_ast_node(ans_class_hash_nodes.tmp_public_decl_node);
@@ -169,14 +171,14 @@ Ans_Ast_Nodes* change_to_class_hash_process(Ans_Ast_Nodes* src_ast_node, const c
 	}
 	mod_filed_decl->left = ans_class_hash_nodes.tmp_public_decl_node;
 	ans_class_hash_nodes.tmp_public_decl_node = mod_filed_decl;
-	if (ans_class_hash_nodes.public_decl_node) {
+	if (ans_class_hash_nodes.tmp_public_decl_node) {
 		build_field_chain(&final_field_node, &tmp_final_node, ans_class_hash_nodes.public_decl_node, ans_class_hash_nodes.tmp_public_decl_node);
 	}
 
-	if (ans_class_hash_nodes.private_decl_node) {
+	if (ans_class_hash_nodes.tmp_private_decl_node) {
 		build_fields_chain(&final_field_node, &tmp_final_node, ans_class_hash_nodes.private_decl_node, ans_class_hash_nodes.tmp_private_decl_node);
 	}
-	if (ans_class_hash_nodes.protected_decl_node) {
+	if (ans_class_hash_nodes.tmp_protected_decl_node) {
 		build_fields_chain(&final_field_node, &tmp_final_node, ans_class_hash_nodes.protected_decl_node, ans_class_hash_nodes.tmp_protected_decl_node);
 	}
 

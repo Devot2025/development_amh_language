@@ -837,6 +837,15 @@ Ans_Ast_Nodes* build_ans_ast_sign_symbol(Ans_Lex_Token_List* src_ans_token_list)
 		ans_left->right = ans_right;
 		return ans_left;
 	}
+
+	else if (ans_token_list_expect_token_data(src_ans_token_list, E_Ans_Lex_Token_Type_Operator, "...")) {
+		Ans_Ast_Nodes* ans_left = smart_calloc(Ans_Ast_Nodes, 1);
+		if (!ans_left)return NULL;
+		Ans_Ast_Nodes* ans_right = build_ans_ast_back_ope(src_ans_token_list);
+		set_up_ast_node_op_datas(ans_left, E_Ans_Ast_Token_Type_Stack_F, NULL, 0);
+		ans_left->right = ans_right;
+		return ans_left;
+	}
 	else return build_ans_ast_back_ope(src_ans_token_list);
 }
 

@@ -4,6 +4,7 @@
 #include "ext_alloc.h"
 #define temp_print_e(...) fprintf(stderr, __VA_ARGS__)
 #define load_file_data_si_strap static inline
+
 load_file_data_si_strap size_t get_file_all_size(FILE* src_f) {
 	fseek(src_f, 0, SEEK_END);
 	size_t f_size = ftell(src_f);

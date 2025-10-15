@@ -25,8 +25,11 @@ Ans_Lex_Token_List* start_ans_lex_code(const char* src_ans_code) {
 			if (!ans_operator_token_process(stack_token_word, dst_lex_token_list, &now_lex_mode, tmp_now_ans_code))continue;
 			break;
 		case E_Lex_Mode_Dot:
-			ans_dot_token_process(stack_token_word, dst_lex_token_list, &now_lex_mode, tmp_now_ans_code);
-			continue;
+			if (ans_dot_token_process(stack_token_word, dst_lex_token_list, &now_lex_mode, tmp_now_ans_code))continue;
+
+			break;
+		case E_Lex_Mode_Three_Dot:
+			if (!ans_three_dot_token_process(stack_token_word, dst_lex_token_list, &now_lex_mode, tmp_now_ans_code))continue;
 			break;
 		case E_Lex_Mode_S_Str:
 			ans_s_str_token_process(stack_token_word, dst_lex_token_list, &now_lex_mode, tmp_now_ans_code);
@@ -162,7 +165,7 @@ bool ans_operator_token_process(Str_Buffer_Array* src_stack_token, Ans_Lex_Token
 
 	return two_byte_ope_check;
 }
-void ans_dot_token_process(Str_Buffer_Array* src_stack_token, Ans_Lex_Token_List* src_lex_token, Lex_Ans_Mode* src_lex_mode, const char now_byte_code) {
+bool ans_dot_token_process(Str_Buffer_Array* src_stack_token, Ans_Lex_Token_List* src_lex_token, Lex_Ans_Mode* src_lex_mode, const char now_byte_code) {
 	/*seeking to dot next word(bin or alpha).*/
 
 	if (check_to_alphabet_8byte(now_byte_code) || now_byte_code & 0x80) {
@@ -175,13 +178,33 @@ void ans_dot_token_process(Str_Buffer_Array* src_stack_token, Ans_Lex_Token_List
 		append_lex_token_to_token_list(src_lex_token, src_stack_token, E_Ans_Lex_Token_Type_Operator);
 		/*now not regist to children iden.*/
 	}
+	else if (now_byte_code == '.') {
+		append_lex_token_to_token_list(src_lex_token, src_stack_token, E_Ans_Lex_Token_Type_NULL);
+		append_str_buff(src_stack_token, '.');
+		append_str_buff(src_stack_token, '.');
+
+		*src_lex_mode = E_Lex_Mode_Three_Dot;
+		return false;
+	}
 	/*if now word is binary. dot append.*/
 	else append_str_buff(src_stack_token, '.');
 	/*reset mode*/
 	*src_lex_mode = E_Lex_Mode_Normal;
 	/*now word is re run to next process.*/
+	return true;
 }
-
+bool ans_three_dot_token_process(Str_Buffer_Array* src_stack_token, Ans_Lex_Token_List* src_lex_token, Lex_Ans_Mode* src_lex_mode, const char now_byte_code) {
+	*src_lex_mode = E_Lex_Mode_Normal;
+	if (now_byte_code == '.') {
+		append_str_buff(src_stack_token, '.');
+		append_lex_token_to_token_list(src_lex_token, src_stack_token, E_Ans_Lex_Token_Type_Operator);
+		return true;
+	}
+	else {
+		append_lex_token_to_token_list(src_lex_token, src_stack_token, E_Ans_Lex_Token_Type_Error_Value);
+		return false;
+	}
+}
 void ans_s_str_token_process(Str_Buffer_Array* src_stack_token, Ans_Lex_Token_List* src_lex_token, Lex_Ans_Mode* src_lex_mode, const char now_byte_code) {
 	if (now_byte_code == '\'') {
 		if (src_stack_token->str_index == 0)append_str_buff(src_stack_token, '\0');

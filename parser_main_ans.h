@@ -30,6 +30,8 @@ To_Do_Macro_Func(E_Ans_Ast_Token_Type_Func_Args),\
 To_Do_Macro_Func(E_Ans_Ast_Token_Type_Func_Decl_Args),\
 To_Do_Macro_Func(E_Ans_Ast_Token_Type_Iden),\
 To_Do_Macro_Func(E_Ans_Ast_Token_Type_Var_Decl),\
+To_Do_Macro_Func(E_Ans_Ast_Token_Type_Stack_B),\
+To_Do_Macro_Func(E_Ans_Ast_Token_Type_Stack_F),\
 To_Do_Macro_Func(E_Ans_Ast_Token_Type_Func_Use),\
 To_Do_Macro_Func(E_Ans_Ast_Token_Type_Func_Decl),\
 To_Do_Macro_Func(E_Ans_Ast_Token_Type_Class_Instance),\
