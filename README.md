@@ -62,7 +62,7 @@ Currently supports **Lexical Analysis** and **AST Construction** phases.
 ### 1. Build
 
 ```bash
-gcc main.c ext_alloc.c str_ext.c lexer_main_ans.c hash_process_ans_main.c parser_main_ans.c
+gcc main.c ext_alloc.c str_ext.c lexer_main_ans.c hash_process_ans_main.c parser_main_ans.c run_main_ans.c ir_main_ans.c
 ```
 ## Example: Basic `obj` Declaration and `return`
 
