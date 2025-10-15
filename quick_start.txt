@@ -5,5 +5,4 @@ macOS	– Not applicable	 Unknown (Homebrew GCC may work)	– Not applicable	 Wo
 Other OS	 Unknown	 Unknown	 Unknown	 Unknown
 
 quick start
-
-gcc main.c ext_alloc.c str_ext.c lexer_main_ans.c hash_process_ans_main.c parser_main_ans.c
+gcc main.c ext_alloc.c str_ext.c lexer_main_ans.c hash_process_ans_main.c parser_main_ans.c run_main_ans.c ir_main_ans.c
